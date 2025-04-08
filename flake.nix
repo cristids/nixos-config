@@ -64,8 +64,8 @@
     };
   in {
     nixosConfigurations = {
-      laptop-a = mkHost "dell-nix" [ ./hosts/dell-nix];
-      laptop-b = mkHost "gpdp4-nix" [ ./hosts/gpdp4-nix];
+      dell-nix = mkHost "dell-nix" [ ./hosts/dell-nix];
+      gpdp4-nix = mkHost "gpdp4-nix" [ ./hosts/gpdp4-nix];
     };
   };
 }
