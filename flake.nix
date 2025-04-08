@@ -42,6 +42,8 @@
   inputs = {
     #nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, home-manager, ... }: let
@@ -49,6 +51,7 @@
 
     sharedModules = [
       ./modules/core/configuration.nix
+       home-manager.nixosModules.home-manager
     ];
 
     # overlays = [
@@ -60,6 +63,13 @@
       modules = sharedModules ++ hostModules ++ [{
         networking.hostName = name;
         # nixpkgs.overlays = overlays;
+
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.backupFileExtension = "hm-bkp";
+          home-manager.users.cristian = import ./home/home.nix;
+          # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
+        }
       }];
     };
   in {
