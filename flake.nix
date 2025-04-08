@@ -64,12 +64,11 @@
         networking.hostName = name;
         # nixpkgs.overlays = overlays;
 
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.backupFileExtension = "hm-bkp";
-          home-manager.users.cristian = import ./home/home.nix;
-          # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
-        }
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+        home-manager.backupFileExtension = "hm-bkp";
+        home-manager.users.cristian = import ./home/home.nix;
+        # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix        
       }];
     };
   in {
