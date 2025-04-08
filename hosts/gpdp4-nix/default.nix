@@ -1,6 +1,7 @@
 {
   imports = [ 
       ./hardware-configuration.nix 
+      ./boot.nix
       ../../modules/drivers/amd.nix
   ];
 
