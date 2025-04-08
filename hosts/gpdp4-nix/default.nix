@@ -1,7 +1,7 @@
 {
   imports = [ 
       ./hardware-configuration.nix 
-      ../modules/drivers/amd.nix
+      ../../modules/drivers/amd.nix
   ];
 
   # This indicates the version of the system at the time of the first install.
