@@ -34,7 +34,7 @@
         home-manager.users.cristian = import ./modules/home/home.nix;
         # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix 
         home-manager.extraSpecialArgs = { 
-          unstable = import inputs.unstable {
+          unstable = import unstable {
             inherit system;
             config.allowUnfree = true;
           };
