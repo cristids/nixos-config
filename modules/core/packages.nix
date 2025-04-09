@@ -92,7 +92,7 @@
 
         wget
         vscode
-        azuredatastudio
+        # azuredatastudio
         mc
         rambox
         _1password-gui

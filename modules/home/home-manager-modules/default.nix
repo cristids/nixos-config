@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 {
   imports = [
+    ./azuredatastudio.nix
 #    ./bash.nix
 #    ./bashrc-personal.nix
     ./bat.nix
