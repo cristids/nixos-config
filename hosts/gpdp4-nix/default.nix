@@ -2,6 +2,7 @@
   imports = [ 
       ./hardware-configuration.nix 
       ./boot.nix
+      ./fprintd.nix
       ../../modules/drivers/amd.nix
   ];
 
