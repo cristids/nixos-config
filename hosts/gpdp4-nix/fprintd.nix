@@ -1,3 +1,4 @@
+{ pkgs, config, ... }:
 {
   services.udev.extraRules = ''
     # GPD Pocket 4 - FocalTech Fingerprint Reader (2808:0752)
