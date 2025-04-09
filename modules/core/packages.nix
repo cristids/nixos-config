@@ -103,6 +103,7 @@
         zoom-us
         tlrc
         hplip
+        hplipWithPlugin
 #        mplayer
 #        vlc
 #         xorg.xrandr
