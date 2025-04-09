@@ -91,7 +91,7 @@
         yazi #TUI File Manager
 
         wget
-        vscode
+        # vscode
         # azuredatastudio
         mc
         rambox

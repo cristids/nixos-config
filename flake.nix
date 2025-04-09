@@ -10,8 +10,14 @@
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }: let
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: let
     system = "x86_64-linux";
+
+    unstablePkgs = import inputs.unstable {
+      inherit system;
+      config.allowUnfree = true;
+    };
+
 
     sharedModules = [
       ./modules/core/configuration.nix
@@ -24,6 +30,7 @@
 
     mkHost = name: hostModules: nixpkgs.lib.nixosSystem {
       inherit system;
+      
       modules = sharedModules ++ hostModules ++ [{
         networking.hostName = name;
         # nixpkgs.overlays = overlays;
@@ -34,10 +41,7 @@
         home-manager.users.cristian = import ./modules/home/home.nix;
         # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix 
         home-manager.extraSpecialArgs = { 
-          unstable = import unstable {
-            inherit system;
-            config.allowUnfree = true;
-          };
+          unstable = unstablePkgs;
         };       
       }];
     };
