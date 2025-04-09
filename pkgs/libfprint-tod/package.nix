@@ -16,9 +16,22 @@ stdenv.mkDerivation rec {
   '';
 
   installPhase = ''
-    mkdir -p $out
-    cp -r ./* $out/
+    echo ">>> Installing libfprint-tod"
+    find . -type f
+
+    mkdir -p $out/lib
+    cp -v usr/lib/x86_64-linux-gnu/libfprint-2.so.* $out/lib/
+
+    # If there are udev rules, install those too
+    if [ -d lib/udev/rules.d ]; then
+      mkdir -p $out/lib/udev/rules.d
+      cp -v lib/udev/rules.d/* $out/lib/udev/rules.d/
+    fi
+
+    echo ">>> Done installing"
   '';
+
+
 
   meta = with lib; {
     description = "FocalTech libfprint driver from .deb";
