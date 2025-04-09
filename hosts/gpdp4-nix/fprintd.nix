@@ -5,7 +5,13 @@
 #     cp /home/cristian/focaltech-driver/libfprint-2.so.2.0.0 $out/lib/libfprint-2/tod-1/libfprint-focaltech.so
 #   '';
 # in {
-{
+let
+  libfprintTod = pkgs.callPackage ../../pkgs/libfprint-tod/package.nix {};
+in {
+  environment.systemPackages = with pkgs; [
+    libfprintTod
+  ];
+
   services.udev.extraRules = ''
     # GPD Pocket 4 - FocalTech Fingerprint Reader (2808:0752)
     # SUBSYSTEM=="usb", ATTRS{idVendor}=="2808", ATTRS{idProduct}=="0752", MODE="0660", GROUP="plugdev", TAG+="uaccess"
@@ -31,5 +37,10 @@
   #   tod.enable = true;
   #   tod.driver = "${focaltechDriver}/lib/libfprint-2/tod-1/libfprint-focaltech.so";
   # };
+  
+  # environment.systemPackages = with pkgs; [
+  #   fprintd
+  #   libfprint-focaltech-2808-a658
+  # ];
 
 }
