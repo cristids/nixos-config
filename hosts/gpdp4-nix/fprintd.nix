@@ -18,7 +18,7 @@
   services.fprintd.tod = {
   enable = true;
   driver = {
-    outPath = "/home/cristian/.local/focaltech";
+    outPath = "/home/cristian/focaltech-driver";
     driverPath = "/lib/libfprint-2/tod-1";
   };
 };
