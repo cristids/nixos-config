@@ -102,6 +102,7 @@
         libreoffice-qt-fresh
         zoom-us
         tlrc
+        hplip
 #        mplayer
 #        vlc
 #         xorg.xrandr
