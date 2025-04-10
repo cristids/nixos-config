@@ -2,9 +2,7 @@
   stdenv,
   lib,
   fetchurl,
-  meson,
-  ninja,
-  gobject-introspection,
+  rpm,
   cpio,
   glib,
   gusb,
@@ -17,37 +15,28 @@
   autoPatchelfHook,
   makePkgconfigItem,
   copyPkgconfigItems,
-  dpkg,
-  gtk-doc,
-  docbook-xsl-nons,
-  docbook_xml_dtd_43,
-  
 }:
+
+# https://discourse.nixos.org/t/request-for-libfprint-port-for-2808-a658/55474
 let
   # The provided `.so`'s name in the binary package we fetch and unpack
   libso = "libfprint-2.so.2.0.0";
 in
-
-
 stdenv.mkDerivation rec {
-  pname = "libfprint-focaltech-driver";
-  # pname = "libfprint-2-2-tod";
-  version = "1.94.4-tod1";
-  NIX_CFLAGS_LINK = "-lgusb";
+  pname = "libfprint-focaltech";
+  version = "1.94.4";
 
   src = fetchurl {
-    url = "https://github.com/ftfpteams/focaltech-linux-fingerprint-driver/raw/refs/heads/main/Ubuntu_Debian/x86/libfprint-2-2_1.94.4+tod1-0ubuntu1~22.04.2_amd64_20250219.deb";
-    sha256 = "06j0i02hx98q2f4x50y2h2di87h0ihvi0ky03xg0f62pd2xmx37y";
+    url = "https://github.com/ftfpteams/focaltech-linux-fingerprint-driver/raw/refs/heads/main/Fedora_Redhat/libfprint-2-2_1.94.4+tod1_redhat_all_x64_20250219.install";
+    sha256 = "0y7kb2mr7zd2irfgsmfgdpb0c7v33cb4hf3hfj7mndalma3xdhzn";  # Will help you fetch this in a sec
   };
 
-  nativeBuildInputs = [ 
-    dpkg
-    pkg-config 
+  nativeBuildInputs = [
+    rpm
+    cpio
+    pkg-config
     autoPatchelfHook
     copyPkgconfigItems
-    meson
-    ninja
-    gobject-introspection
   ];
 
   buildInputs = [
@@ -61,33 +50,14 @@ stdenv.mkDerivation rec {
     cairo
   ];
 
-# Optional, to debug linking:
-  preConfigure = ''
-    echo "GUSB flags:"
-    pkg-config --libs --cflags gusb || true
-  '';
-
-
-  mesonFlags = [
-    # "-Dudev_rules_dir=${placeholder "out"}/lib/udev/rules.d"
-    # # Include virtual drivers for fprintd tests
-    # "-Ddrivers=all"
-    # "-Dudev_hwdb_dir=${placeholder "out"}/lib/udev/hwdb.d"
-    "-Dsystemd=false"  
-    "-Dintrospection=false"
-  ];
-
   unpackPhase = ''
     runHook preUnpack
+  echo "Extracting embedded tar.gz using sed"
 
-    dpkg-deb -x $src .
+  sed '1,/^main \$@/d' $src > libfprint.tar.gz
 
-    runHook postUnpack
-  '';
-
-  patchPhase = ''
-  substituteInPlace meson.build \
-    --replace "dependency('libfprint-2'," "dependency('libfprint-2', required: true), dependency('gusb', required: true),"
+  mkdir extracted
+  tar -xzf libfprint.tar.gz -C .
 '';
 
   # custom pkg-config based on libfprint's pkg-config
@@ -109,11 +79,10 @@ stdenv.mkDerivation rec {
     })
   ];
 
-
   installPhase = ''
     runHook preInstall
 
-    install -Dm444 usr/lib/x86_64-linux-gnu/${libso} -t $out/lib
+    install -Dm444 usr/lib64/${libso} -t $out/lib
 
     # create this symlink as it was there in libfprint
     ln -s -T $out/lib/${libso} $out/lib/libfprint-2.so
@@ -128,9 +97,9 @@ stdenv.mkDerivation rec {
 
 
   meta = with lib; {
-    description = "FocalTech libfprint driver from .deb";
-    license = licenses.unfreeRedistributable;  # Adjust if needed
-    maintainers = with maintainers; [ ];
+    description = "FocalTech libfprint-2 driver (Fedora variant)";
+    homepage = "https://github.com/ftfpteams/focaltech-linux-fingerprint-driver";
     platforms = platforms.linux;
+    license = licenses.unfree;  # Sadly
   };
 }
