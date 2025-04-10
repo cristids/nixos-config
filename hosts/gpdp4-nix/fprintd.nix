@@ -9,7 +9,7 @@ in {
   services.fprintd = {
     enable = true;
     package = pkgs.fprintd.override {
-      libfprint = focaltech;
+      libfprint = libfprint-focaltech;
     };
   };
 }
