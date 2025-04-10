@@ -107,7 +107,7 @@
 #        mplayer
 #        vlc
 #         xorg.xrandr
-        vivaldi
-        vivaldi-ffmpeg-codecs
+        # vivaldi
+        # vivaldi-ffmpeg-codecs
     ];
 }
