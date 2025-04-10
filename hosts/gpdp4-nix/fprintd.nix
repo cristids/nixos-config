@@ -11,4 +11,5 @@ in {
     package = pkgs.fprintd.override {
       libfprint = focaltech;
     };
+  };
 }
