@@ -22,8 +22,9 @@ stdenv.mkDerivation rec {
     mkdir -p $out/lib
     cp -v usr/lib/x86_64-linux-gnu/libfprint-2.so.* $out/lib/
 
-    # If there are udev rules, install those too
+    # Install udev rules from lib/udev/rules.d/
     if [ -d lib/udev/rules.d ]; then
+      echo ">>> Found udev rules in lib/udev/rules.d"
       mkdir -p $out/lib/udev/rules.d
       cp -v lib/udev/rules.d/* $out/lib/udev/rules.d/
     fi
@@ -31,7 +32,7 @@ stdenv.mkDerivation rec {
     echo ">>> Done installing"
   '';
 
-
+  driverPath = "/lib";
 
   meta = with lib; {
     description = "FocalTech libfprint driver from .deb";
