@@ -54,16 +54,39 @@ let
   # Inline the custom package
   libfprintTod = pkgs.callPackage ../../pkgs/libfprint-tod/package.nix {};
 in {
+  services.udev.extraRules = ''
+    # GPD Pocket 4 - FocalTech Fingerprint Reader (2808:0752)
+    # SUBSYSTEM=="usb", ATTRS{idVendor}=="2808", ATTRS{idProduct}=="0752", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+    
+    # FocalTech Systems Co., Ltd Fingerprint
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="2808", ATTRS{idProduct}=="*", ATTRS{dev}=="*", TEST=="power/control", ATTR{power/control}="auto", MODE="0660", GROUP="plugdev"
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="2808", ATTRS{idProduct}=="*", ENV{LIBFPRINT_DRIVER}="FocalTech Systems Co., Ltd Fingerprint"
+  '';
+
   # Enable fprintd with tod driver
-  services.fprintd.enable = true;
-  services.fprintd.tod.enable = true;
-  services.fprintd.tod.driver = libfprintTod;
+  services.fprintd = {
+    enable = true;
+    package = pkgs.fprintd.override {
+      libfprint = libfprintTod;
+    };
+    # package = pkgs.fprintd-tod;
+    # tod = {
+    #   enable = true;
+    #   driver = libfprintTod;
+    # };
+    # Optional: Enable fprintd for other drivers if needed
+    # enable = true;
+    # drivers = [ "libfprint-focaltech-2808-a658" ];
+  };
+  # services.fprintd.enable = true;
+  # services.fprintd.tod.enable = true;
+  # services.fprintd.tod.driver = libfprintTod;
 
   # Include the package in systemPackages for CLI access if needed
-  environment.systemPackages = [ libfprintTod ];
+  # environment.systemPackages = [ pkgs.fprintd libfprintTod ];
 
   # Ensure udev rules are active
-  services.udev.packages = [ libfprintTod ];
+  services.udev.packages = [ pkgs.gusb libfprintTod ];
 
   # Optional: Allow unfree for this host if you haven't globally
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
