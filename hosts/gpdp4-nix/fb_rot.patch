@@ -1,0 +1,3111 @@
+From 6744840b17822b0c9b15ea8d0130429d133a22f2 Mon Sep 17 00:00:00 2001
+From: Oliver Steffen <osteffen@redhat.com>
+Date: Thu, 22 Feb 2024 14:32:31 +0100
+Subject: [PATCH 01/13] build: Track explicit module dependencies in
+ Makefile.core.def
+
+Add a new keyword, "depends", to the module definition syntax
+used in Makefile.core.def. This allows specifying explicit module
+dependencies together with the module definition.
+
+Do not track the "extra_deps.lst" file in the repository anymore,
+it is now auto-generated.
+
+Make use of this new keyword in the bli module definition.
+
+Signed-off-by: Oliver Steffen <osteffen@redhat.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ .gitignore                  | 1 -
+ conf/Makefile.common        | 1 +
+ gentpl.py                   | 7 +++++++
+ grub-core/Makefile.am       | 9 ++++++---
+ grub-core/Makefile.core.def | 1 +
+ grub-core/extra_deps.lst    | 1 -
+ grub-core/genmoddep.awk     | 2 +-
+ 7 files changed, 16 insertions(+), 6 deletions(-)
+ delete mode 100644 grub-core/extra_deps.lst
+
+diff --git a/.gitignore b/.gitignore
+index 4d0dfb700..11fcecf5c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -11,7 +11,6 @@
+ *.img
+ *.log
+ *.lst
+-!/grub-core/extra_deps.lst
+ *.marker
+ *.mod
+ *.o
+diff --git a/conf/Makefile.common b/conf/Makefile.common
+index b8f216f6c..c60f55386 100644
+--- a/conf/Makefile.common
++++ b/conf/Makefile.common
+@@ -111,6 +111,7 @@ MOD_FILES =
+ MODULE_FILES =
+ MARKER_FILES =
+ KERNEL_HEADER_FILES =
++EXTRA_DEPS =
+ 
+ bin_SCRIPTS =
+ bin_PROGRAMS =
+diff --git a/gentpl.py b/gentpl.py
+index bfab2113a..3b12eca6c 100644
+--- a/gentpl.py
++++ b/gentpl.py
+@@ -631,6 +631,9 @@ def platform_values(defn, platform, suffix):
+ def extra_dist(defn):
+     return foreach_value(defn, "extra_dist", lambda value: value + " ")
+ 
++def extra_dep(defn):
++    return foreach_value(defn, "depends", lambda value: value + " ")
++
+ def platform_sources(defn, p): return platform_values(defn, p, "")
+ def platform_nodist_sources(defn, p): return platform_values(defn, p, "_nodist")
+ 
+@@ -699,6 +702,10 @@ def module(defn, platform):
+     gvar_add("MOD_FILES", name + ".mod")
+     gvar_add("MARKER_FILES", name + ".marker")
+     gvar_add("CLEANFILES", name + ".marker")
++
++    for dep in defn.find_all("depends"):
++        gvar_add("EXTRA_DEPS", "depends " + name + " " + dep + ":")
++
+     output("""
+ """ + name + """.marker: $(""" + cname(defn) + """_SOURCES) $(nodist_""" + cname(defn) + """_SOURCES)
+ 	$(TARGET_CPP) -DGRUB_LST_GENERATOR $(CPPFLAGS_MARKER) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(""" + cname(defn) + """_CPPFLAGS) $(CPPFLAGS) $^ > $@.new || (rm -f $@; exit 1)
+diff --git a/grub-core/Makefile.am b/grub-core/Makefile.am
+index f18550c1c..1eda467e0 100644
+--- a/grub-core/Makefile.am
++++ b/grub-core/Makefile.am
+@@ -454,8 +454,11 @@ crypto.lst: $(srcdir)/lib/libgcrypt-grub/cipher/crypto.lst
+ platform_DATA += crypto.lst
+ CLEANFILES += crypto.lst
+ 
+-syminfo.lst: gensyminfo.sh kernel_syms.lst $(top_srcdir)/grub-core/extra_deps.lst $(MODULE_FILES)
+-	cat kernel_syms.lst $(top_srcdir)/grub-core/extra_deps.lst > $@.new
++extra_deps.lst:
++	@echo $(EXTRA_DEPS) | sed "s/\s*:\s*/\n/g" > $@
++
++syminfo.lst: gensyminfo.sh kernel_syms.lst extra_deps.lst $(MODULE_FILES)
++	cat kernel_syms.lst extra_deps.lst > $@.new
+ 	for m in $(MODULE_FILES); do \
+ 	  sh $< $$m >> $@.new || exit 1; \
+ 	done
+@@ -465,7 +468,7 @@ syminfo.lst: gensyminfo.sh kernel_syms.lst $(top_srcdir)/grub-core/extra_deps.ls
+ moddep.lst: syminfo.lst genmoddep.awk video.lst
+ 	cat $< | sort | $(AWK) -f $(srcdir)/genmoddep.awk > $@ || (rm -f $@; exit 1)
+ platform_DATA += moddep.lst
+-CLEANFILES += config.log syminfo.lst moddep.lst
++CLEANFILES += config.log syminfo.lst moddep.lst extra_deps.lst
+ 
+ $(MOD_FILES): %.mod : genmod.sh moddep.lst %.module$(EXEEXT) build-grub-module-verifier$(BUILD_EXEEXT)
+ 	TARGET_OBJ2ELF=@TARGET_OBJ2ELF@ sh $^ $@
+diff --git a/grub-core/Makefile.core.def b/grub-core/Makefile.core.def
+index 007ff628e..8e1b1d9f3 100644
+--- a/grub-core/Makefile.core.def
++++ b/grub-core/Makefile.core.def
+@@ -2598,4 +2598,5 @@ module = {
+   name = bli;
+   efi = commands/bli.c;
+   enable = efi;
++  depends = part_gpt;
+ };
+diff --git a/grub-core/extra_deps.lst b/grub-core/extra_deps.lst
+deleted file mode 100644
+index f44ad6a0c..000000000
+--- a/grub-core/extra_deps.lst
++++ /dev/null
+@@ -1 +0,0 @@
+-depends bli part_gpt
+diff --git a/grub-core/genmoddep.awk b/grub-core/genmoddep.awk
+index cc987a53a..ab457cb2b 100644
+--- a/grub-core/genmoddep.awk
++++ b/grub-core/genmoddep.awk
+@@ -35,7 +35,7 @@ BEGIN {
+     for (i = 3; i <= NF; i++) {
+       modtab[$2] = modtab[$2] " " $i;
+     }
+-  }
++  } else if ($1 == "") {} #Skip empty lines
+   else {
+     printf "error: %u: unrecognized input format\n", NR >"/dev/stderr";
+     error++;
+-- 
+2.47.2
+
+
+From b272ed230eb9269a37a79b1ad760e1e233eb9916 Mon Sep 17 00:00:00 2001
+From: Ard Biesheuvel <ardb@kernel.org>
+Date: Sat, 27 Apr 2024 08:07:58 -0500
+Subject: [PATCH 02/13] efi: Fix stack protector issues
+
+The "ground truth" stack protector cookie value is kept in a global
+variable, and loaded in every function prologue and epilogue to store
+it into resp. compare it with the stack slot holding the cookie.
+
+If the comparison fails, the program aborts, and this might occur
+spuriously when the global variable changes values between the entry and
+exit of a function. This implies that assigning the global variable at
+boot should not involve any instrumented function calls, unless special
+care is taken to ensure that the live call stack is synchronized, which
+is non-trivial.
+
+So avoid any function calls, including grub_memcpy(), which is
+unnecessary given that the stack cookie is always a suitably aligned
+variable of the native word size.
+
+While at it, leave the last byte 0x0 to avoid inadvertent unbounded
+strings on the stack.
+
+Note that the use of __attribute__((optimize)) is described as
+unsuitable for production use in the GCC documentation, so let's drop
+this as well now that it is no longer needed.
+
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Signed-off-by: Glenn Washburn <development@efficientek.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ grub-core/kern/efi/init.c      | 27 ++++++++-------------------
+ grub-core/kern/main.c          | 11 +++++++++++
+ include/grub/stack_protector.h | 12 ++++++++++++
+ 3 files changed, 31 insertions(+), 19 deletions(-)
+
+diff --git a/grub-core/kern/efi/init.c b/grub-core/kern/efi/init.c
+index 6c54af6e7..1637077e1 100644
+--- a/grub-core/kern/efi/init.c
++++ b/grub-core/kern/efi/init.c
+@@ -39,12 +39,6 @@ static grub_efi_char16_t stack_chk_fail_msg[] =
+ 
+ static grub_guid_t rng_protocol_guid = GRUB_EFI_RNG_PROTOCOL_GUID;
+ 
+-/*
+- * Don't put this on grub_efi_init()'s local stack to avoid it
+- * getting a stack check.
+- */
+-static grub_efi_uint8_t stack_chk_guard_buf[32];
+-
+ /* Initialize canary in case there is no RNG protocol. */
+ grub_addr_t __stack_chk_guard = (grub_addr_t) GRUB_STACK_PROTECTOR_INIT;
+ 
+@@ -77,8 +71,8 @@ __stack_chk_fail (void)
+   while (1);
+ }
+ 
+-static void
+-stack_protector_init (void)
++grub_addr_t
++grub_stack_protector_init (void)
+ {
+   grub_efi_rng_protocol_t *rng;
+ 
+@@ -87,23 +81,20 @@ stack_protector_init (void)
+   if (rng != NULL)
+     {
+       grub_efi_status_t status;
++      grub_addr_t guard = 0;
+ 
+-      status = rng->get_rng (rng, NULL, sizeof (stack_chk_guard_buf),
+-			     stack_chk_guard_buf);
++      status = rng->get_rng (rng, NULL, sizeof (guard) - 1,
++		             (grub_efi_uint8_t *) &guard);
+       if (status == GRUB_EFI_SUCCESS)
+-	grub_memcpy (&__stack_chk_guard, stack_chk_guard_buf, sizeof (__stack_chk_guard));
++	return guard;
+     }
+-}
+-#else
+-static void
+-stack_protector_init (void)
+-{
++  return 0;
+ }
+ #endif
+ 
+ grub_addr_t grub_modbase;
+ 
+-__attribute__ ((__optimize__ ("-fno-stack-protector"))) void
++void
+ grub_efi_init (void)
+ {
+   grub_modbase = grub_efi_section_addr ("mods");
+@@ -111,8 +102,6 @@ grub_efi_init (void)
+      messages.  */
+   grub_console_init ();
+ 
+-  stack_protector_init ();
+-
+   /* Initialize the memory management system.  */
+   grub_efi_mm_init ();
+ 
+diff --git a/grub-core/kern/main.c b/grub-core/kern/main.c
+index 731c07c29..744197785 100644
+--- a/grub-core/kern/main.c
++++ b/grub-core/kern/main.c
+@@ -18,6 +18,7 @@
+  */
+ 
+ #include <grub/kernel.h>
++#include <grub/stack_protector.h>
+ #include <grub/misc.h>
+ #include <grub/symbol.h>
+ #include <grub/dl.h>
+@@ -265,6 +266,16 @@ reclaim_module_space (void)
+ void __attribute__ ((noreturn))
+ grub_main (void)
+ {
++#ifdef GRUB_STACK_PROTECTOR
++  /*
++   * This call should only be made from a function that does not return because
++   * functions that return will get instrumented to check that the stack cookie
++   * does not change and this call will change the stack cookie. Thus a stack
++   * guard failure will be triggered.
++   */
++  grub_update_stack_guard ();
++#endif
++
+   /* First of all, initialize the machine.  */
+   grub_machine_init ();
+ 
+diff --git a/include/grub/stack_protector.h b/include/grub/stack_protector.h
+index 13d2657d9..e4849b2a0 100644
+--- a/include/grub/stack_protector.h
++++ b/include/grub/stack_protector.h
+@@ -29,6 +29,18 @@ extern void __attribute__ ((noreturn)) EXPORT_FUNC (__stack_chk_fail) (void);
+ static grub_addr_t __attribute__ ((weakref("__stack_chk_guard"))) EXPORT_VAR (_stack_chk_guard);
+ static void __attribute__ ((noreturn, weakref("__stack_chk_fail"))) EXPORT_FUNC (_stack_chk_fail) (void);
+ #endif
++
++extern grub_addr_t grub_stack_protector_init (void);
++
++static inline __attribute__((__always_inline__))
++void grub_update_stack_guard (void)
++{
++  grub_addr_t guard;
++
++  guard = grub_stack_protector_init ();
++  if (guard)
++     __stack_chk_guard = guard;
++}
+ #endif
+ 
+ #endif /* GRUB_STACK_PROTECTOR_H */
+-- 
+2.47.2
+
+
+From 99b4c0c3841bf71b0f2ef83607e9d6f13874c67c Mon Sep 17 00:00:00 2001
+From: Lidong Chen <lidong.chen@oracle.com>
+Date: Mon, 29 Apr 2024 16:38:03 +0000
+Subject: [PATCH 03/13] disk/mdraid1x_linux: Prevent infinite recursion
+
+The test corpus for version-1 RAID generated an infinite recursion
+in grub_partition_iterate() while attempting to read the superblock.
+The reason for the issue was that the data region overlapped with
+the superblock.
+
+The infinite call loop looks like this:
+  grub_partition_iterate() -> partmap->iterate() ->
+    -> grub_disk_read() -> grub_disk_read_small() ->
+    -> grub_disk_read_small_real() -> grub_diskfilter_read() ->
+    -> read_lv() -> read_segment() -> grub_diskfilter_read_node() ->
+    -> grub_disk_read() -> grub_disk_read_small() -> ...
+
+The fix adds checks for both the superblock region and the data
+region when parsing the superblock metadata in grub_mdraid_detect().
+
+Signed-off-by: Lidong Chen <lidong.chen@oracle.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ grub-core/disk/mdraid1x_linux.c | 78 +++++++++++++++++++++++++++++++++
+ 1 file changed, 78 insertions(+)
+
+diff --git a/grub-core/disk/mdraid1x_linux.c b/grub-core/disk/mdraid1x_linux.c
+index 72e5cb6f4..dd5d440a3 100644
+--- a/grub-core/disk/mdraid1x_linux.c
++++ b/grub-core/disk/mdraid1x_linux.c
+@@ -23,6 +23,7 @@
+ #include <grub/err.h>
+ #include <grub/misc.h>
+ #include <grub/diskfilter.h>
++#include <grub/safemath.h>
+ 
+ GRUB_MOD_LICENSE ("GPLv3+");
+ 
+@@ -103,6 +104,9 @@ struct grub_raid_super_1x
+ 
+ #define WriteMostly1    1	/* Mask for writemostly flag in above devflags.  */
+ 
++#define GRUB_MD_SECTOR_SHIFT	9	/* Follow Linux kernel v6.8. */
++#define GRUB_MD_SECTOR_SIZE	(1 << GRUB_MD_SECTOR_SHIFT)
++
+ static struct grub_diskfilter_vg *
+ grub_mdraid_detect (grub_disk_t disk,
+ 		    struct grub_diskfilter_pv_id *id,
+@@ -129,6 +133,7 @@ grub_mdraid_detect (grub_disk_t disk,
+       grub_uint32_t level;
+       struct grub_diskfilter_vg *array;
+       char *uuid;
++      grub_uint64_t sb_sz, data_end, sb_end;
+ 
+       if (size == GRUB_DISK_SIZE_UNKNOWN && minor_version == 0)
+ 	continue;
+@@ -154,6 +159,79 @@ grub_mdraid_detect (grub_disk_t disk,
+ 	  || grub_le_to_cpu64 (sb.super_offset) != sector)
+ 	continue;
+ 
++      /*
++       * The first check follows the Linux kernel's data_size
++       * validation from v6.8-rc5.
++       */
++      if (grub_le_to_cpu64 (sb.data_size) < 10 ||
++	  grub_le_to_cpu64 (sb.raid_disks) > GRUB_MDRAID_MAX_DISKS)
++	{
++	  grub_dprintf ("mdraid1x", "Corrupted superblock\n");
++	  return NULL;
++	}
++
++      /*
++       * Total size of superblock: 256 bytes plus 2 bytes per device
++       * in the array.
++       */
++      sb_sz = sizeof (struct grub_raid_super_1x) + grub_le_to_cpu64 (sb.raid_disks) * 2;
++
++      if (grub_add (grub_le_to_cpu64 (sb.super_offset),
++		    (ALIGN_UP(sb_sz, GRUB_MD_SECTOR_SIZE) >> GRUB_MD_SECTOR_SHIFT), &sb_end))
++	{
++	  grub_dprintf ("mdraid1x", "Invalid superblock end.\n");
++	  return NULL;
++	}
++
++      if (grub_add (grub_le_to_cpu64 (sb.data_offset),
++		    grub_le_to_cpu64 (sb.data_size), &data_end))
++	{
++	  grub_dprintf ("mdraid1x", "Invalid data end.\n");
++	  return NULL;
++	}
++
++      /* In minor versions 1 and 2, superblock is positioned before data. */
++      if (minor_version)
++	{
++	  if (grub_le_to_cpu64 (sb.data_offset) < sb_end)
++	    {
++	      grub_dprintf ("mdraid1x",
++			    "The superblock either overlaps with the data "
++			    "or is behind it.\n");
++	      return NULL;
++	    }
++
++	  if (data_end > size)
++	    {
++	      grub_dprintf ("mdraid1x",
++			    "The data region ends at %" PRIuGRUB_UINT64_T ", "
++			    "past the end of the disk (%" PRIuGRUB_UINT64_T ")\n",
++			    data_end, size);
++	      return NULL;
++	    }
++	}
++      else
++	{
++	  /* In minor version 0, superblock is at the end of the device. */
++	  if (grub_le_to_cpu64 (sb.super_offset) < data_end)
++	    {
++	      grub_dprintf ("mdraid1x",
++			    "The data either overlaps with the superblock "
++			    "or is behind it.\n");
++	      return NULL;
++	    }
++
++	  if (sb_end > size)
++	    {
++	      grub_dprintf ("mdraid1x",
++			    "The superblock region ends at "
++			    "%" PRIuGRUB_UINT64_T ", past the end of "
++			    "the disk (%" PRIuGRUB_UINT64_T ")\n",
++			    sb_end, size);
++	      return NULL;
++	    }
++	}
++
+       if (sb.major_version != grub_cpu_to_le32_compile_time (1))
+ 	/* Unsupported version.  */
+ 	return NULL;
+-- 
+2.47.2
+
+
+From 386b59ddb42fa3f86ddfe557113b25c8fa16f88c Mon Sep 17 00:00:00 2001
+From: Forest <forestix@nom.one>
+Date: Mon, 6 May 2024 17:07:30 -0700
+Subject: [PATCH 04/13] disk/cryptodisk: Allow user to retry failed passphrase
+
+Give the user a chance to re-enter their cryptodisk passphrase after a typo,
+rather than immediately failing (and likely dumping them into a GRUB shell).
+
+By default, we allow 3 tries before giving up. A value in the
+cryptodisk_passphrase_tries environment variable will override this default.
+
+The user can give up early by entering an empty passphrase, just as they
+could before this patch.
+
+Signed-off-by: Forest <forestix@nom.one>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ docs/grub.texi              |  9 +++++
+ grub-core/disk/cryptodisk.c | 71 ++++++++++++++++++++++++++++---------
+ 2 files changed, 64 insertions(+), 16 deletions(-)
+
+diff --git a/docs/grub.texi b/docs/grub.texi
+index a225f9a88..d32266f69 100644
+--- a/docs/grub.texi
++++ b/docs/grub.texi
+@@ -3277,6 +3277,7 @@ These variables have special meaning to GRUB.
+ * color_normal::
+ * config_directory::
+ * config_file::
++* cryptodisk_passphrase_tries::
+ * debug::
+ * default::
+ * fallback::
+@@ -3441,6 +3442,14 @@ processed by commands @command{configfile} (@pxref{configfile}) or @command{norm
+ (@pxref{normal}).  It is restored to the previous value when command completes.
+ 
+ 
++@node cryptodisk_passphrase_tries
++@subsection cryptodisk_passphrase_tries
++
++When prompting the user for a cryptodisk passphrase, allow this many attempts
++before giving up. Defaults to @samp{3} if unset or set to an invalid value.
++(The user can give up early by entering an empty passphrase.)
++
++
+ @node debug
+ @subsection debug
+ 
+diff --git a/grub-core/disk/cryptodisk.c b/grub-core/disk/cryptodisk.c
+index 2246af51b..f98acade6 100644
+--- a/grub-core/disk/cryptodisk.c
++++ b/grub-core/disk/cryptodisk.c
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include <grub/cryptodisk.h>
++#include <grub/env.h>
+ #include <grub/mm.h>
+ #include <grub/misc.h>
+ #include <grub/dl.h>
+@@ -1114,32 +1115,70 @@ grub_cryptodisk_scan_device_real (const char *name,
+     if (!dev)
+       continue;
+ 
+-    if (!cargs->key_len)
++    if (cargs->key_len)
++      {
++	ret = cr->recover_key (source, dev, cargs);
++	if (ret != GRUB_ERR_NONE)
++	  goto error;
++      }
++    else
+       {
+ 	/* Get the passphrase from the user, if no key data. */
+-	askpass = 1;
+-	part = grub_partition_get_name (source->partition);
+-	grub_printf_ (N_("Enter passphrase for %s%s%s (%s): "), source->name,
+-		     source->partition != NULL ? "," : "",
+-		     part != NULL ? part : N_("UNKNOWN"),
+-		     dev->uuid);
+-	grub_free (part);
++	unsigned long tries = 3;
++	const char *tries_env;
+ 
++	askpass = 1;
+ 	cargs->key_data = grub_malloc (GRUB_CRYPTODISK_MAX_PASSPHRASE);
+ 	if (cargs->key_data == NULL)
+ 	  goto error_no_close;
+ 
+-	if (!grub_password_get ((char *) cargs->key_data, GRUB_CRYPTODISK_MAX_PASSPHRASE))
++	tries_env = grub_env_get ("cryptodisk_passphrase_tries");
++	if (tries_env != NULL && tries_env[0] != '\0')
+ 	  {
+-	    grub_error (GRUB_ERR_BAD_ARGUMENT, "passphrase not supplied");
+-	    goto error;
++	    unsigned long tries_env_val;
++	    const char *p;
++
++	    tries_env_val = grub_strtoul (tries_env, &p, 0);
++	    if (*p == '\0' && tries_env_val != ~0UL)
++	      tries = tries_env_val;
++	    else
++	      grub_printf_ (N_("Invalid cryptodisk_passphrase_tries value `%s'. Defaulting to %lu.\n"),
++			    tries_env,
++			    tries);
+ 	  }
+-	cargs->key_len = grub_strlen ((char *) cargs->key_data);
+-      }
+ 
+-    ret = cr->recover_key (source, dev, cargs);
+-    if (ret != GRUB_ERR_NONE)
+-      goto error;
++	for (; tries > 0; tries--)
++	  {
++	    part = grub_partition_get_name (source->partition);
++	    grub_printf_ (N_("Enter passphrase for %s%s%s (%s): "), source->name,
++			 source->partition != NULL ? "," : "",
++			 part != NULL ? part : N_("UNKNOWN"),
++			 dev->uuid);
++	    grub_free (part);
++
++	    if (!grub_password_get ((char *) cargs->key_data, GRUB_CRYPTODISK_MAX_PASSPHRASE))
++	      {
++		grub_error (GRUB_ERR_BAD_ARGUMENT, "passphrase not supplied");
++		goto error;
++	      }
++	    cargs->key_len = grub_strlen ((char *) cargs->key_data);
++
++	    ret = cr->recover_key (source, dev, cargs);
++	    if (ret == GRUB_ERR_NONE)
++	      break;
++	    if (ret != GRUB_ERR_ACCESS_DENIED || tries == 1)
++	      goto error;
++	    grub_puts_ (N_("Invalid passphrase."));
++
++	    /*
++	     * Since recover_key() calls a function that returns grub_errno,
++	     * a leftover error value from a previously rejected passphrase
++	     * will trigger a phantom failure. We therefore clear it before
++	     * trying a new passphrase.
++	     */
++	    grub_errno = GRUB_ERR_NONE;
++	  }
++      }
+ 
+     ret = grub_cryptodisk_insert (dev, name, source);
+     if (ret != GRUB_ERR_NONE)
+-- 
+2.47.2
+
+
+From f456add5f4171b27a1f8aca98e02c14e123bbd59 Mon Sep 17 00:00:00 2001
+From: Rogier <rogier777@gmail.com>
+Date: Mon, 6 May 2024 15:18:45 -0500
+Subject: [PATCH 05/13] disk/lvm: GRUB fails to detect LVM volumes due to an
+ incorrect computation of mda_end
+
+When handling a regular LVM volume, GRUB can fail with the message:
+
+  error: disk `lvmid/******-****-****-****-****-****-****/******-****-****-****-****-****-******' not found.
+
+If the condition which triggers this exists, grub-probe will report the
+error mentioned above. Similarly, the GRUB boot code will fail to detect
+LVM volumes, resulting in a failure to boot off of LVM disks/partitions.
+The condition can be created on any LVM VG by an LVM configuration change,
+so any system with /boot on LVM can become unbootable at "any" time (after
+any LVM configuration change).
+
+The problem is caused by an incorrect computation of mda_end in disk/lvm.c,
+when the metadata area wraps around. Apparently, this can start happening at
+around 220 metadata changes to the VG.
+
+Fixes: 879c4a834 (lvm: Fix two more potential data-dependent alloc overflows)
+Fixes: https://savannah.gnu.org/bugs/?61620
+
+Signed-off-by: Rogier <rogier777@gmail.com>
+Signed-off-by: Glenn Washburn <development@efficientek.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+Tested-By: Michael Chang <mchang@suse.com>
+---
+ grub-core/disk/lvm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/disk/lvm.c b/grub-core/disk/lvm.c
+index 794248540..0c32c95f9 100644
+--- a/grub-core/disk/lvm.c
++++ b/grub-core/disk/lvm.c
+@@ -290,7 +290,7 @@ grub_lvm_detect (grub_disk_t disk,
+ 
+   p = q = (char *)ptr;
+ 
+-  if (grub_add ((grub_size_t)metadatabuf, (grub_size_t)mda_size, &ptr))
++  if (grub_add (ptr, (grub_size_t) grub_le_to_cpu64 (rlocn->size), &ptr))
+     goto error_parsing_metadata;
+ 
+   mda_end = (char *)ptr;
+-- 
+2.47.2
+
+
+From 6cc2e4481b5051febf50390839a9c1707e877731 Mon Sep 17 00:00:00 2001
+From: Pascal Hambourg <pascal@plouf.fr.eu.org>
+Date: Sun, 19 May 2024 17:50:10 +0200
+Subject: [PATCH 06/13] util/grub.d/00_header.in: Quote background image
+ pathname in output
+
+This is required if the pathname contains spaces or GRUB shell
+metacharacters else the generated config file check will fail.
+
+Signed-off-by: Pascal Hambourg <pascal@plouf.fr.eu.org>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ util/grub.d/00_header.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/util/grub.d/00_header.in b/util/grub.d/00_header.in
+index 6a316a5ba..f86b69bad 100644
+--- a/util/grub.d/00_header.in
++++ b/util/grub.d/00_header.in
+@@ -275,7 +275,7 @@ EOF
+ 	prepare_grub_to_access_device `${grub_probe} --target=device "$GRUB_BACKGROUND"`
+ 	cat << EOF
+ insmod $reader
+-background_image -m stretch `make_system_path_relative_to_its_root "$GRUB_BACKGROUND"`
++background_image -m stretch "`make_system_path_relative_to_its_root "$GRUB_BACKGROUND"`"
+ EOF
+     fi
+ fi
+-- 
+2.47.2
+
+
+From d291449ba3a7b51c4469404c2036a91002788d69 Mon Sep 17 00:00:00 2001
+From: Jonathan Davies <jonathan.davies@nutanix.com>
+Date: Mon, 20 May 2024 08:58:24 +0100
+Subject: [PATCH 07/13] docs: Fix spelling mistakes
+
+Signed-off-by: Jonathan Davies <jonathan.davies@nutanix.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ docs/grub.texi | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/docs/grub.texi b/docs/grub.texi
+index d32266f69..1f6d0c724 100644
+--- a/docs/grub.texi
++++ b/docs/grub.texi
+@@ -1259,7 +1259,7 @@ need to write the whole thing by hand.
+ 
+ @menu
+ * Simple configuration::            Recommended for most users
+-* Root Identifcation Heuristics::   Summary on how the root file system is identified.
++* Root Identification Heuristics::  Summary on how the root file system is identified.
+ * Shell-like scripting::            For power users and developers
+ * Multi-boot manual config::        For non-standard multi-OS scenarios
+ * Embedded configuration::          Embedding a configuration file into GRUB
+@@ -1509,7 +1509,7 @@ search for files.  This is usually more reliable, but in some cases it may
+ not be appropriate.  To disable this use of UUIDs, set this option to
+ @samp{true}. Setting this option to @samp{true}, will also set the options
+ @samp{GRUB_DISABLE_LINUX_UUID} and @samp{GRUB_DISABLE_LINUX_PARTUUID} to
+-@samp{true}, unless they have been explicilty set to @samp{false}.
++@samp{true}, unless they have been explicitly set to @samp{false}.
+ 
+ @item GRUB_VIDEO_BACKEND
+ If graphical video support is required, either because the @samp{gfxterm}
+@@ -1642,8 +1642,8 @@ edit the scripts in @file{/etc/grub.d} directly.
+ menu entries; simply type the menu entries you want to add at the end of
+ that file, making sure to leave at least the first two lines intact.
+ 
+-@node Root Identifcation Heuristics
+-@section Root Identifcation Heuristics
++@node Root Identification Heuristics
++@section Root Identification Heuristics
+ If the target operating system uses the Linux kernel, @command{grub-mkconfig}
+ attempts to identify the root file system via a heuristic algoirthm.  This
+ algorithm selects the identification method of the root file system by
+@@ -2577,7 +2577,7 @@ value corresponds to a value on the client machine.
+ @end example
+ 
+ The UUID is the Client Machine Identifier Option Definition as specified in
+-RFC 4578. The client will only attempt to loouk up a UUID config file if it
++RFC 4578. The client will only attempt to look up a UUID config file if it
+ was provided by the DHCP server.
+ 
+ The client will only attempt to look up an IPv6 address config once, however,
+@@ -2986,12 +2986,12 @@ The device syntax is like this:
+ driver in use. BIOS and EFI disks use either @samp{fd} or @samp{hd} followed
+ by a digit, like @samp{fd0}, or @samp{cd}.
+ AHCI, PATA (ata), crypto, USB use the name of driver followed by a number.
+-Memdisk and host are limited to one disk and so it's refered just by driver
++Memdisk and host are limited to one disk and so it's referred just by driver
+ name.
+ RAID (md), ofdisk (ieee1275 and nand), LVM (lvm), LDM, virtio (vdsk)
+ and arcdisk (arc) use intrinsic name of disk prefixed by driver name.
+ Additionally just ``nand'' refers to the disk aliased as ``nand''.
+-Conflicts are solved by suffixing a number if necessarry.
++Conflicts are solved by suffixing a number if necessary.
+ Commas need to be escaped.
+ Loopback uses whatever name specified to @command{loopback} command.
+ Hostdisk uses names specified in device.map as long as it's of the form
+@@ -4690,7 +4690,7 @@ However, this limitation can be worked around by using blocklist syntax. So
+ for instance, @code{(hd1,gpt2)} can not be used, but @code{(hd1,gpt2)0+} will
+ achieve the desired result.
+ 
+-GRUB suports devices encrypted using LUKS, LUKS2 and geli. Note that necessary
++GRUB supports devices encrypted using LUKS, LUKS2 and geli. Note that necessary
+ modules (@var{luks}, @var{luks2} and @var{geli}) have to be loaded manually
+ before this command can be used. For LUKS2 only the PBKDF2 key derivation
+ function is supported, as Argon2 is not yet supported.
+@@ -6354,7 +6354,7 @@ Moreover all current input consumers are limited to ASCII.
+ GRUB supports being translated. For this you need to have language *.mo files in $prefix/locale, load gettext module and set ``lang'' variable.
+ 
+ @section Regexp
+-Regexps work on unicode characters, however no attempt at checking cannonical
++Regexps work on unicode characters, however no attempt at checking canonical
+ equivalence has been made. Moreover the classes like [:alpha:] match only
+ ASCII subset.
+ 
+@@ -6368,7 +6368,7 @@ matched as binary. Similar behaviour is for matching OSBundleRequired.
+ Since IEEE1275 aliases and OSBundleRequired don't contain any non-ASCII it
+ should never be a problem in practice.
+ Case-sensitive identifiers are matched as raw strings, no canonical
+-equivalence check is performed. Case-insenstive identifiers are matched
++equivalence check is performed. Case-insensitive identifiers are matched
+ as RAW but additionally [a-z] is equivalent to [A-Z]. GRUB-defined
+ identifiers use only ASCII and so should user-defined ones.
+ Identifiers containing non-ASCII may work but aren't supported.
+@@ -6656,7 +6656,7 @@ On EMU platform no serial port is available.
+ Console charset refers only to firmware-assisted console. gfxterm is always
+ Unicode (see Internationalisation section for its limitations). Serial is
+ configurable to UTF-8 or ASCII (see Internationalisation). In case of qemu
+-and coreboot ports the refered console is vga_text. Loongson always uses
++and coreboot ports the referred console is vga_text. Loongson always uses
+ gfxterm.
+ 
+ Most limited one is ASCII. CP437 provides additionally pseudographics.
+@@ -6818,7 +6818,7 @@ Advanced operations for power users:
+ @item x86: iorw (direct access to I/O ports)
+ @end itemize
+ 
+-Miscelaneous:
++Miscellaneous:
+ @itemize
+ @item cmos (x86-*, ieee1275, mips-qemu_mips, mips-loongson): cmostest
+     (used on some laptops to check for special power-on key), cmosclean
+-- 
+2.47.2
+
+
+From 1ba39de62f91302f7eb95e78dc8ce9c086f74df8 Mon Sep 17 00:00:00 2001
+From: Gao Xiang <hsiangkao@linux.alibaba.com>
+Date: Tue, 21 May 2024 01:20:57 +0800
+Subject: [PATCH 08/13] safemath: Add ALIGN_UP_OVF() which checks for an
+ overflow
+
+The following EROFS patch will use this helper to handle
+ALIGN_UP() overflow.
+
+Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ include/grub/safemath.h | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/include/grub/safemath.h b/include/grub/safemath.h
+index fbd9b5925..e032f63a0 100644
+--- a/include/grub/safemath.h
++++ b/include/grub/safemath.h
+@@ -32,6 +32,21 @@
+ 
+ #define grub_cast(a, res)	grub_add ((a), 0, (res))
+ 
++/*
++ * It's caller's responsibility to check "align" does not equal 0 and
++ * is power of 2.
++ */
++#define ALIGN_UP_OVF(v, align, res) 			\
++({							\
++  bool __failed;					\
++  typeof(v) __a = ((typeof(v))(align) - 1);		\
++							\
++  __failed = grub_add (v, __a, res);			\
++  if (__failed == false)				\
++    *(res) &= ~__a;					\
++  __failed;						\
++})
++
+ #else
+ #error gcc 5.1 or newer or clang 8.0 or newer is required
+ #endif
+-- 
+2.47.2
+
+
+From 9d603061aaa5edb9a0e5ba443ec01d5c295bef0a Mon Sep 17 00:00:00 2001
+From: Yifan Zhao <zhaoyifan@sjtu.edu.cn>
+Date: Tue, 21 May 2024 01:20:58 +0800
+Subject: [PATCH 09/13] fs/erofs: Add support for the EROFS
+
+The EROFS [1] is a lightweight read-only filesystem designed for performance
+which has already been shipped in most Linux distributions as well as widely
+used in several scenarios, such as Android system partitions, container
+images and rootfs for embedded devices.
+
+This patch brings in the EROFS uncompressed support. Now, it's possible to
+boot directly through GRUB with an EROFS rootfs.
+
+Support for the EROFS compressed files will be added later.
+
+[1] https://erofs.docs.kernel.org
+
+Signed-off-by: Yifan Zhao <zhaoyifan@sjtu.edu.cn>
+Tested-by: Daniel Axtens <dja@axtens.net>
+Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ INSTALL                     |    8 +-
+ Makefile.util.def           |    1 +
+ docs/grub.texi              |    3 +-
+ grub-core/Makefile.core.def |    5 +
+ grub-core/fs/erofs.c        | 1000 +++++++++++++++++++++++++++++++++++
+ 5 files changed, 1012 insertions(+), 5 deletions(-)
+ create mode 100644 grub-core/fs/erofs.c
+
+diff --git a/INSTALL b/INSTALL
+index 8d9207c84..84030c9f4 100644
+--- a/INSTALL
++++ b/INSTALL
+@@ -77,15 +77,15 @@ Prerequisites for make-check:
+ 
+ * If running a Linux kernel the following modules must be loaded:
+   - fuse, loop
+-  - btrfs, ext4, f2fs, fat, hfs, hfsplus, jfs, mac-roman, minix, nilfs2,
++  - btrfs, erofs, ext4, f2fs, fat, hfs, hfsplus, jfs, mac-roman, minix, nilfs2,
+     reiserfs, udf, xfs
+   - On newer kernels, the exfat kernel modules may be used instead of the
+     exfat FUSE filesystem
+ * The following are Debian named packages required mostly for the full
+   suite of filesystem testing (but some are needed by other tests as well):
+-  - btrfs-progs, dosfstools, e2fsprogs, exfat-utils, f2fs-tools, genromfs,
+-    hfsprogs, jfsutils, nilfs-tools, ntfs-3g, reiserfsprogs, squashfs-tools,
+-    reiserfsprogs, udftools, xfsprogs, zfs-fuse
++  - btrfs-progs, dosfstools, e2fsprogs, erofs-utils, exfat-utils, f2fs-tools,
++    genromfs, hfsprogs, jfsutils, nilfs-tools, ntfs-3g, reiserfsprogs,
++    squashfs-tools, reiserfsprogs, udftools, xfsprogs, zfs-fuse
+   - exfat-fuse, if not using the exfat kernel module
+   - gzip, lzop, xz-utils
+   - attr, cpio, g++, gawk, parted, recode, tar, util-linux
+diff --git a/Makefile.util.def b/Makefile.util.def
+index 9432365a9..8d3bc107f 100644
+--- a/Makefile.util.def
++++ b/Makefile.util.def
+@@ -98,6 +98,7 @@ library = {
+   common = grub-core/fs/cpio_be.c;
+   common = grub-core/fs/odc.c;
+   common = grub-core/fs/newc.c;
++  common = grub-core/fs/erofs.c;
+   common = grub-core/fs/ext2.c;
+   common = grub-core/fs/fat.c;
+   common = grub-core/fs/exfat.c;
+diff --git a/docs/grub.texi b/docs/grub.texi
+index 1f6d0c724..cb3a14fca 100644
+--- a/docs/grub.texi
++++ b/docs/grub.texi
+@@ -353,6 +353,7 @@ blocklist notation. The currently supported filesystem types are @dfn{Amiga
+ Fast FileSystem (AFFS)}, @dfn{AtheOS fs}, @dfn{BeFS},
+ @dfn{BtrFS} (including raid0, raid1, raid10, gzip and lzo),
+ @dfn{cpio} (little- and big-endian bin, odc and newc variants),
++@dfn{EROFS} (only uncompressed support for now),
+ @dfn{Linux ext2/ext3/ext4}, @dfn{DOS FAT12/FAT16/FAT32},
+ @dfn{exFAT}, @dfn{F2FS}, @dfn{HFS}, @dfn{HFS+},
+ @dfn{ISO9660} (including Joliet, Rock-ridge and multi-chunk files),
+@@ -6276,7 +6277,7 @@ assumed to be encoded in UTF-8.
+ NTFS, JFS, UDF, HFS+, exFAT, long filenames in FAT, Joliet part of
+ ISO9660 are treated as UTF-16 as per specification. AFS and BFS are read
+ as UTF-8, again according to specification. BtrFS, cpio, tar, squash4, minix,
+-minix2, minix3, ROMFS, ReiserFS, XFS, ext2, ext3, ext4, FAT (short names),
++minix2, minix3, ROMFS, ReiserFS, XFS, EROFS, ext2, ext3, ext4, FAT (short names),
+ F2FS, RockRidge part of ISO9660, nilfs2, UFS1, UFS2 and ZFS are assumed
+ to be UTF-8. This might be false on systems configured with legacy charset
+ but as long as the charset used is superset of ASCII you should be able to
+diff --git a/grub-core/Makefile.core.def b/grub-core/Makefile.core.def
+index 8e1b1d9f3..7fa9446bd 100644
+--- a/grub-core/Makefile.core.def
++++ b/grub-core/Makefile.core.def
+@@ -1442,6 +1442,11 @@ module = {
+   common = fs/odc.c;
+ };
+ 
++module = {
++  name = erofs;
++  common = fs/erofs.c;
++};
++
+ module = {
+   name = ext2;
+   common = fs/ext2.c;
+diff --git a/grub-core/fs/erofs.c b/grub-core/fs/erofs.c
+new file mode 100644
+index 000000000..46cfc2e5c
+--- /dev/null
++++ b/grub-core/fs/erofs.c
+@@ -0,0 +1,1000 @@
++/* erofs.c - Enhanced Read-Only File System */
++/*
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2024 Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/disk.h>
++#include <grub/dl.h>
++#include <grub/err.h>
++#include <grub/file.h>
++#include <grub/fs.h>
++#include <grub/fshelp.h>
++#include <grub/misc.h>
++#include <grub/mm.h>
++#include <grub/safemath.h>
++#include <grub/types.h>
++
++GRUB_MOD_LICENSE ("GPLv3+");
++
++#define EROFS_SUPER_OFFSET	1024
++#define EROFS_MAGIC		0xE0F5E1E2
++#define EROFS_ISLOTBITS		5
++
++#define EROFS_FEATURE_INCOMPAT_CHUNKED_FILE	0x00000004
++#define EROFS_ALL_FEATURE_INCOMPAT		EROFS_FEATURE_INCOMPAT_CHUNKED_FILE
++
++struct grub_erofs_super
++{
++  grub_uint32_t		magic;
++  grub_uint32_t		checksum;
++  grub_uint32_t		feature_compat;
++  grub_uint8_t		log2_blksz;
++  grub_uint8_t		sb_extslots;
++
++  grub_uint16_t		root_nid;
++  grub_uint64_t		inos;
++
++  grub_uint64_t		build_time;
++  grub_uint32_t		build_time_nsec;
++  grub_uint32_t		blocks;
++  grub_uint32_t		meta_blkaddr;
++  grub_uint32_t		xattr_blkaddr;
++  grub_packed_guid_t	uuid;
++  grub_uint8_t		volume_name[16];
++  grub_uint32_t		feature_incompat;
++
++  union
++  {
++    grub_uint16_t	available_compr_algs;
++    grub_uint16_t	lz4_max_distance;
++  } GRUB_PACKED u1;
++
++  grub_uint16_t		extra_devices;
++  grub_uint16_t		devt_slotoff;
++  grub_uint8_t		log2_dirblksz;
++  grub_uint8_t		xattr_prefix_count;
++  grub_uint32_t		xattr_prefix_start;
++  grub_uint64_t		packed_nid;
++  grub_uint8_t		reserved2[24];
++} GRUB_PACKED;
++
++#define EROFS_INODE_LAYOUT_COMPACT	0
++#define EROFS_INODE_LAYOUT_EXTENDED	1
++
++#define EROFS_INODE_FLAT_PLAIN		0
++#define EROFS_INODE_COMPRESSED_FULL	1
++#define EROFS_INODE_FLAT_INLINE		2
++#define EROFS_INODE_COMPRESSED_COMPACT	3
++#define EROFS_INODE_CHUNK_BASED		4
++
++#define EROFS_I_VERSION_MASKS		0x01
++#define EROFS_I_DATALAYOUT_MASKS	0x07
++
++#define EROFS_I_VERSION_BIT	0
++#define EROFS_I_DATALAYOUT_BIT	1
++
++struct grub_erofs_inode_chunk_info
++{
++  grub_uint16_t		format;
++  grub_uint16_t		reserved;
++} GRUB_PACKED;
++
++#define EROFS_CHUNK_FORMAT_BLKBITS_MASK	0x001F
++#define EROFS_CHUNK_FORMAT_INDEXES	0x0020
++
++#define EROFS_BLOCK_MAP_ENTRY_SIZE	4
++#define EROFS_MAP_MAPPED		0x02
++
++#define EROFS_NULL_ADDR			1
++#define EROFS_NAME_LEN			255
++#define EROFS_PATH_LEN			4096
++#define EROFS_MIN_LOG2_BLOCK_SIZE	9
++#define EROFS_MAX_LOG2_BLOCK_SIZE	16
++
++struct grub_erofs_inode_chunk_index
++{
++  grub_uint16_t		advise;
++  grub_uint16_t		device_id;
++  grub_uint32_t		blkaddr;
++};
++
++union grub_erofs_inode_i_u
++{
++  grub_uint32_t				compressed_blocks;
++  grub_uint32_t				raw_blkaddr;
++
++  grub_uint32_t				rdev;
++
++  struct grub_erofs_inode_chunk_info	c;
++};
++
++struct grub_erofs_inode_compact
++{
++  grub_uint16_t			i_format;
++
++  grub_uint16_t			i_xattr_icount;
++  grub_uint16_t			i_mode;
++  grub_uint16_t			i_nlink;
++  grub_uint32_t			i_size;
++  grub_uint32_t			i_reserved;
++
++  union grub_erofs_inode_i_u	i_u;
++
++  grub_uint32_t			i_ino;
++  grub_uint16_t			i_uid;
++  grub_uint16_t			i_gid;
++  grub_uint32_t			i_reserved2;
++} GRUB_PACKED;
++
++struct grub_erofs_inode_extended
++{
++  grub_uint16_t			i_format;
++
++  grub_uint16_t			i_xattr_icount;
++  grub_uint16_t			i_mode;
++  grub_uint16_t			i_reserved;
++  grub_uint64_t			i_size;
++
++  union grub_erofs_inode_i_u	i_u;
++
++  grub_uint32_t			i_ino;
++
++  grub_uint32_t			i_uid;
++  grub_uint32_t			i_gid;
++  grub_uint64_t			i_mtime;
++  grub_uint32_t			i_mtime_nsec;
++  grub_uint32_t			i_nlink;
++  grub_uint8_t			i_reserved2[16];
++} GRUB_PACKED;
++
++union grub_erofs_inode
++{
++  struct grub_erofs_inode_compact	c;
++  struct grub_erofs_inode_extended	e;
++} GRUB_PACKED;
++
++#define EROFS_FT_UNKNOWN	0
++#define EROFS_FT_REG_FILE	1
++#define EROFS_FT_DIR		2
++#define EROFS_FT_CHRDEV		3
++#define EROFS_FT_BLKDEV		4
++#define EROFS_FT_FIFO		5
++#define EROFS_FT_SOCK		6
++#define EROFS_FT_SYMLINK	7
++
++struct grub_erofs_dirent
++{
++  grub_uint64_t		nid;
++  grub_uint16_t		nameoff;
++  grub_uint8_t		file_type;
++  grub_uint8_t		reserved;
++} GRUB_PACKED;
++
++struct grub_erofs_map_blocks
++{
++  grub_uint64_t		m_pa;    /* physical address */
++  grub_uint64_t		m_la;    /* logical address */
++  grub_uint64_t		m_plen;  /* physical length */
++  grub_uint64_t		m_llen;  /* logical length */
++  grub_uint32_t		m_flags;
++};
++
++struct grub_erofs_xattr_ibody_header
++{
++  grub_uint32_t		h_reserved;
++  grub_uint8_t		h_shared_count;
++  grub_uint8_t		h_reserved2[7];
++  grub_uint32_t		h_shared_xattrs[0];
++};
++
++struct grub_fshelp_node
++{
++  struct grub_erofs_data	*data;
++  union grub_erofs_inode	inode;
++
++  grub_uint64_t			ino;
++  grub_uint8_t			inode_type;
++  grub_uint8_t			inode_datalayout;
++
++  /* If the inode has been read into memory? */
++  bool				inode_loaded;
++};
++
++struct grub_erofs_data
++{
++  grub_disk_t			disk;
++  struct grub_erofs_super	sb;
++
++  struct grub_fshelp_node	inode;
++};
++
++#define erofs_blocksz(data) (((grub_uint32_t) 1) << data->sb.log2_blksz)
++
++static grub_size_t
++grub_erofs_strnlen (const char *s, grub_size_t n)
++{
++  const char *p = s;
++
++  if (n == 0)
++    return 0;
++
++  while (n-- && *p)
++    p++;
++
++  return p - s;
++}
++
++static grub_uint64_t
++erofs_iloc (grub_fshelp_node_t node)
++{
++  struct grub_erofs_super *sb = &node->data->sb;
++
++  return ((grub_uint64_t) grub_le_to_cpu32 (sb->meta_blkaddr) << sb->log2_blksz) +
++	 (node->ino << EROFS_ISLOTBITS);
++}
++
++static grub_err_t
++erofs_read_inode (struct grub_erofs_data *data, grub_fshelp_node_t node)
++{
++  union grub_erofs_inode *di;
++  grub_err_t err;
++  grub_uint16_t i_format;
++  grub_uint64_t addr = erofs_iloc (node);
++
++  di = (union grub_erofs_inode *) &node->inode;
++
++  err = grub_disk_read (data->disk, addr >> GRUB_DISK_SECTOR_BITS,
++			addr & (GRUB_DISK_SECTOR_SIZE - 1),
++			sizeof (struct grub_erofs_inode_compact), &di->c);
++  if (err != GRUB_ERR_NONE)
++    return err;
++
++  i_format = grub_le_to_cpu16 (di->c.i_format);
++  node->inode_type = (i_format >> EROFS_I_VERSION_BIT) & EROFS_I_VERSION_MASKS;
++  node->inode_datalayout = (i_format >> EROFS_I_DATALAYOUT_BIT) & EROFS_I_DATALAYOUT_MASKS;
++
++  switch (node->inode_type)
++    {
++    case EROFS_INODE_LAYOUT_EXTENDED:
++      addr += sizeof (struct grub_erofs_inode_compact);
++      err = grub_disk_read (data->disk, addr >> GRUB_DISK_SECTOR_BITS,
++                            addr & (GRUB_DISK_SECTOR_SIZE - 1),
++                            sizeof (struct grub_erofs_inode_extended) - sizeof (struct grub_erofs_inode_compact),
++                            (grub_uint8_t *) di + sizeof (struct grub_erofs_inode_compact));
++      if (err != GRUB_ERR_NONE)
++	return err;
++      break;
++    case EROFS_INODE_LAYOUT_COMPACT:
++      break;
++    default:
++      return grub_error (GRUB_ERR_BAD_FS, "invalid type %u @ inode %" PRIuGRUB_UINT64_T,
++			 node->inode_type, node->ino);
++    }
++
++  node->inode_loaded = true;
++
++  return 0;
++}
++
++static grub_uint64_t
++erofs_inode_size (grub_fshelp_node_t node)
++{
++  return node->inode_type == EROFS_INODE_LAYOUT_COMPACT
++	     ? sizeof (struct grub_erofs_inode_compact)
++	     : sizeof (struct grub_erofs_inode_extended);
++}
++
++static grub_uint64_t
++erofs_inode_file_size (grub_fshelp_node_t node)
++{
++  union grub_erofs_inode *di = (union grub_erofs_inode *) &node->inode;
++
++  return node->inode_type == EROFS_INODE_LAYOUT_COMPACT
++	     ? grub_le_to_cpu32 (di->c.i_size)
++	     : grub_le_to_cpu64 (di->e.i_size);
++}
++
++static grub_uint32_t
++erofs_inode_xattr_ibody_size (grub_fshelp_node_t node)
++{
++  grub_uint16_t cnt = grub_le_to_cpu16 (node->inode.e.i_xattr_icount);
++
++  if (cnt == 0)
++    return 0;
++
++  return sizeof (struct grub_erofs_xattr_ibody_header) + ((cnt - 1) * sizeof (grub_uint32_t));
++}
++
++static grub_uint64_t
++erofs_inode_mtime (grub_fshelp_node_t node)
++{
++  return node->inode_type == EROFS_INODE_LAYOUT_COMPACT
++	     ? grub_le_to_cpu64 (node->data->sb.build_time)
++	     : grub_le_to_cpu64 (node->inode.e.i_mtime);
++}
++
++static grub_err_t
++erofs_map_blocks_flatmode (grub_fshelp_node_t node,
++			   struct grub_erofs_map_blocks *map)
++{
++  grub_uint64_t nblocks, lastblk, file_size;
++  bool tailendpacking = (node->inode_datalayout == EROFS_INODE_FLAT_INLINE);
++  grub_uint64_t blocksz = erofs_blocksz (node->data);
++
++  /* `file_size` is checked by caller and cannot be zero, hence nblocks > 0. */
++  file_size = erofs_inode_file_size (node);
++  if (grub_add (file_size, blocksz - 1, &nblocks))
++    return grub_error (GRUB_ERR_OUT_OF_RANGE, "nblocks overflow");
++  nblocks >>= node->data->sb.log2_blksz;
++  lastblk = nblocks - tailendpacking;
++
++  map->m_flags = EROFS_MAP_MAPPED;
++
++  /* No overflow as (lastblk <= nblocks) && (nblocks * blocksz <= UINT64_MAX - blocksz + 1). */
++  if (map->m_la < (lastblk * blocksz))
++    {
++      if (grub_mul ((grub_uint64_t) grub_le_to_cpu32 (node->inode.e.i_u.raw_blkaddr), blocksz, &map->m_pa) ||
++	  grub_add (map->m_pa, map->m_la, &map->m_pa))
++	return grub_error (GRUB_ERR_OUT_OF_RANGE, "m_pa overflow");
++      if (grub_sub (lastblk * blocksz, map->m_la, &map->m_plen))
++	return grub_error (GRUB_ERR_OUT_OF_RANGE, "m_plen underflow");
++    }
++  else if (tailendpacking)
++    {
++      if (grub_add (erofs_iloc (node), erofs_inode_size (node), &map->m_pa) ||
++	  grub_add (map->m_pa, erofs_inode_xattr_ibody_size (node), &map->m_pa) ||
++	  grub_add (map->m_pa, map->m_la % blocksz, &map->m_pa))
++	return grub_error (GRUB_ERR_OUT_OF_RANGE, "m_pa overflow when handling tailpacking");
++      if (grub_sub (file_size, map->m_la, &map->m_plen))
++	return grub_error (GRUB_ERR_OUT_OF_RANGE, "m_plen overflow when handling tailpacking");
++
++      /* No overflow as map->m_plen <= UINT64_MAX - blocksz + 1. */
++      if (((map->m_pa % blocksz) + map->m_plen) > blocksz)
++	return grub_error (GRUB_ERR_BAD_FS,
++                           "inline data cross block boundary @ inode %" PRIuGRUB_UINT64_T,
++                           node->ino);
++    }
++  else
++    return grub_error (GRUB_ERR_BAD_FS,
++		       "invalid map->m_la=%" PRIuGRUB_UINT64_T
++		       " @ inode %" PRIuGRUB_UINT64_T,
++		       map->m_la, node->ino);
++
++  map->m_llen = map->m_plen;
++  return GRUB_ERR_NONE;
++}
++
++static grub_err_t
++erofs_map_blocks_chunkmode (grub_fshelp_node_t node,
++			    struct grub_erofs_map_blocks *map)
++{
++  grub_uint16_t chunk_format = grub_le_to_cpu16 (node->inode.e.i_u.c.format);
++  grub_uint64_t unit, pos, chunknr, blkaddr;
++  grub_uint8_t chunkbits;
++  grub_err_t err;
++
++  if (chunk_format & EROFS_CHUNK_FORMAT_INDEXES)
++    unit = sizeof (struct grub_erofs_inode_chunk_index);
++  else
++    unit = EROFS_BLOCK_MAP_ENTRY_SIZE;
++
++  chunkbits = node->data->sb.log2_blksz + (chunk_format & EROFS_CHUNK_FORMAT_BLKBITS_MASK);
++  if (chunkbits > 63)
++    return grub_error (GRUB_ERR_BAD_FS, "invalid chunkbits %u @ inode %" PRIuGRUB_UINT64_T,
++		       chunkbits, node->ino);
++
++  chunknr = map->m_la >> chunkbits;
++
++  if (grub_add (erofs_iloc (node), erofs_inode_size (node), &pos))
++    return grub_error (GRUB_ERR_OUT_OF_RANGE, "chunkmap position overflow when adding inode size");
++
++  if (grub_add (pos, erofs_inode_xattr_ibody_size (node), &pos))
++    return grub_error (GRUB_ERR_OUT_OF_RANGE, "chunkmap position overflow when adding xattr size");
++
++  if (ALIGN_UP_OVF (pos, unit, &pos))
++    return grub_error (GRUB_ERR_OUT_OF_RANGE, "position overflow when seeking at the start of chunkmap");
++
++  /* No overflow for multiplication as chunkbits >= 9 and sizeof(unit) <= 8. */
++  if (grub_add (pos, chunknr * unit, &pos))
++    return grub_error (GRUB_ERR_OUT_OF_RANGE, "chunkmap position overflow when finding the specific chunk");
++
++  map->m_la = chunknr << chunkbits;
++
++  if (grub_sub (erofs_inode_file_size (node), map->m_la, &map->m_plen))
++    return grub_error (GRUB_ERR_OUT_OF_RANGE, "m_plen underflow");
++  map->m_plen = grub_min (((grub_uint64_t) 1) << chunkbits,
++			  ALIGN_UP (map->m_plen, erofs_blocksz (node->data)));
++
++  if (chunk_format & EROFS_CHUNK_FORMAT_INDEXES)
++    {
++      struct grub_erofs_inode_chunk_index idx;
++
++      err = grub_disk_read (node->data->disk, pos >> GRUB_DISK_SECTOR_BITS,
++			    pos & (GRUB_DISK_SECTOR_SIZE - 1), unit, &idx);
++      if (err != GRUB_ERR_NONE)
++	return err;
++
++      blkaddr = grub_le_to_cpu32 (idx.blkaddr);
++    }
++  else
++    {
++      grub_uint32_t blkaddr_le;
++
++      err = grub_disk_read (node->data->disk, pos >> GRUB_DISK_SECTOR_BITS,
++			    pos & (GRUB_DISK_SECTOR_SIZE - 1), unit, &blkaddr_le);
++      if (err != GRUB_ERR_NONE)
++	return err;
++
++      blkaddr = grub_le_to_cpu32 (blkaddr_le);
++    }
++
++  if (blkaddr == EROFS_NULL_ADDR)
++    {
++      map->m_pa = 0;
++      map->m_flags = 0;
++    }
++  else
++    {
++      map->m_pa = blkaddr << node->data->sb.log2_blksz;
++      map->m_flags = EROFS_MAP_MAPPED;
++    }
++
++  map->m_llen = map->m_plen;
++  return GRUB_ERR_NONE;
++}
++
++static grub_err_t
++erofs_map_blocks (grub_fshelp_node_t node, struct grub_erofs_map_blocks *map)
++{
++  if (map->m_la >= erofs_inode_file_size (node))
++    {
++      map->m_llen = map->m_plen = 0;
++      map->m_pa = 0;
++      map->m_flags = 0;
++      return GRUB_ERR_NONE;
++    }
++
++  if (node->inode_datalayout != EROFS_INODE_CHUNK_BASED)
++    return erofs_map_blocks_flatmode (node, map);
++  else
++    return erofs_map_blocks_chunkmode (node, map);
++}
++
++static grub_err_t
++erofs_read_raw_data (grub_fshelp_node_t node, grub_uint8_t *buf, grub_uint64_t size,
++		     grub_uint64_t offset, grub_uint64_t *bytes)
++{
++  struct grub_erofs_map_blocks map = {0};
++  grub_uint64_t cur;
++  grub_err_t err;
++
++  if (bytes)
++    *bytes = 0;
++
++  if (node->inode_loaded == false)
++    {
++      err = erofs_read_inode (node->data, node);
++      if (err != GRUB_ERR_NONE)
++	return err;
++    }
++
++  cur = offset;
++  while (cur < offset + size)
++    {
++      grub_uint8_t *const estart = buf + cur - offset;
++      grub_uint64_t eend, moff = 0;
++
++      map.m_la = cur;
++      err = erofs_map_blocks (node, &map);
++      if (err != GRUB_ERR_NONE)
++	return err;
++
++      if (grub_add(map.m_la, map.m_llen, &eend))
++	return grub_error (GRUB_ERR_OUT_OF_RANGE, "eend overflow");
++
++      eend = grub_min (eend, offset + size);
++      if (!(map.m_flags & EROFS_MAP_MAPPED))
++	{
++	  if (!map.m_llen)
++	    {
++	      /* Reached EOF. */
++	      grub_memset (estart, 0, offset + size - cur);
++	      cur = offset + size;
++	      continue;
++	    }
++
++	  /* It's a hole. */
++	  grub_memset (estart, 0, eend - cur);
++	  if (bytes)
++	    *bytes += eend - cur;
++	  cur = eend;
++	  continue;
++	}
++
++      if (cur > map.m_la)
++	{
++	  moff = cur - map.m_la;
++	  map.m_la = cur;
++	}
++
++      err = grub_disk_read (node->data->disk,
++			    (map.m_pa + moff) >> GRUB_DISK_SECTOR_BITS,
++			    (map.m_pa + moff) & (GRUB_DISK_SECTOR_SIZE - 1),
++			    eend - map.m_la, estart);
++      if (err != GRUB_ERR_NONE)
++	return err;
++
++      if (bytes)
++	*bytes += eend - map.m_la;
++
++      cur = eend;
++    }
++
++  return GRUB_ERR_NONE;
++}
++
++static int
++erofs_iterate_dir (grub_fshelp_node_t dir, grub_fshelp_iterate_dir_hook_t hook,
++		   void *hook_data)
++{
++  grub_uint64_t offset = 0, file_size;
++  grub_uint32_t blocksz = erofs_blocksz (dir->data);
++  grub_uint8_t *buf;
++  grub_err_t err;
++
++  if (dir->inode_loaded == false)
++    {
++      err = erofs_read_inode (dir->data, dir);
++      if (err != GRUB_ERR_NONE)
++	return 0;
++    }
++
++  file_size = erofs_inode_file_size (dir);
++  buf = grub_malloc (blocksz);
++  if (buf == NULL)
++    return 0;
++
++  while (offset < file_size)
++    {
++      grub_uint64_t maxsize = grub_min (blocksz, file_size - offset);
++      struct grub_erofs_dirent *de = (void *) buf, *end;
++      grub_uint16_t nameoff;
++
++      err = erofs_read_raw_data (dir, buf, maxsize, offset, NULL);
++      if (err != GRUB_ERR_NONE)
++	goto not_found;
++
++      nameoff = grub_le_to_cpu16 (de->nameoff);
++      if (nameoff < sizeof (struct grub_erofs_dirent) || nameoff >= maxsize)
++	{
++	  grub_error (GRUB_ERR_BAD_FS,
++		      "invalid nameoff %u @ inode %" PRIuGRUB_UINT64_T,
++		      nameoff, dir->ino);
++	  goto not_found;
++	}
++
++      end = (struct grub_erofs_dirent *) ((grub_uint8_t *) de + nameoff);
++      while (de < end)
++	{
++	  struct grub_fshelp_node *fdiro;
++	  enum grub_fshelp_filetype type;
++	  char filename[EROFS_NAME_LEN + 1];
++	  grub_size_t de_namelen;
++	  const char *de_name;
++
++	  fdiro = grub_malloc (sizeof (struct grub_fshelp_node));
++	  if (fdiro == NULL)
++	    goto not_found;
++
++	  fdiro->data = dir->data;
++	  fdiro->ino = grub_le_to_cpu64 (de->nid);
++	  fdiro->inode_loaded = false;
++
++	  nameoff = grub_le_to_cpu16 (de->nameoff);
++	  if (nameoff < sizeof (struct grub_erofs_dirent) || nameoff >= maxsize)
++	    {
++	      grub_error (GRUB_ERR_BAD_FS,
++			  "invalid nameoff %u @ inode %" PRIuGRUB_UINT64_T,
++			  nameoff, dir->ino);
++	      grub_free (fdiro);
++	      goto not_found;
++	    }
++
++	  de_name = (char *) buf + nameoff;
++	  if (de + 1 >= end)
++	    de_namelen = grub_erofs_strnlen (de_name, maxsize - nameoff);
++	  else
++	    {
++	      if (grub_sub (grub_le_to_cpu16 (de[1].nameoff), nameoff, &de_namelen))
++		{
++		  grub_error (GRUB_ERR_OUT_OF_RANGE, "de_namelen underflow");
++		  grub_free (fdiro);
++		  goto not_found;
++		}
++	    }
++
++	  if (nameoff + de_namelen > maxsize || de_namelen > EROFS_NAME_LEN)
++	    {
++	      grub_error (GRUB_ERR_BAD_FS,
++			  "invalid de_namelen %" PRIuGRUB_SIZE
++			  " @ inode %" PRIuGRUB_UINT64_T,
++			  de_namelen, dir->ino);
++	      grub_free (fdiro);
++	      goto not_found;
++	    }
++
++	  grub_memcpy (filename, de_name, de_namelen);
++	  filename[de_namelen] = '\0';
++
++	  switch (grub_le_to_cpu16 (de->file_type))
++	    {
++	    case EROFS_FT_REG_FILE:
++	    case EROFS_FT_BLKDEV:
++	    case EROFS_FT_CHRDEV:
++	    case EROFS_FT_FIFO:
++	    case EROFS_FT_SOCK:
++	      type = GRUB_FSHELP_REG;
++	      break;
++	    case EROFS_FT_DIR:
++	      type = GRUB_FSHELP_DIR;
++	      break;
++	    case EROFS_FT_SYMLINK:
++	      type = GRUB_FSHELP_SYMLINK;
++	      break;
++	    case EROFS_FT_UNKNOWN:
++	    default:
++	      type = GRUB_FSHELP_UNKNOWN;
++	    }
++
++	  if (hook (filename, type, fdiro, hook_data))
++	    {
++	      grub_free (buf);
++	      return 1;
++	    }
++
++	  ++de;
++	}
++
++      offset += maxsize;
++    }
++
++ not_found:
++  grub_free (buf);
++  return 0;
++}
++
++static char *
++erofs_read_symlink (grub_fshelp_node_t node)
++{
++  char *symlink;
++  grub_size_t sz;
++  grub_err_t err;
++
++  if (node->inode_loaded == false)
++    {
++      err = erofs_read_inode (node->data, node);
++      if (err != GRUB_ERR_NONE)
++	return NULL;
++    }
++
++  sz = erofs_inode_file_size (node);
++  if (sz >= EROFS_PATH_LEN)
++    {
++      grub_error (GRUB_ERR_BAD_FS,
++		  "symlink too long @ inode %" PRIuGRUB_UINT64_T, node->ino);
++      return NULL;
++    }
++
++  symlink = grub_malloc (sz + 1);
++  if (symlink == NULL)
++    return NULL;
++
++  err = erofs_read_raw_data (node, (grub_uint8_t *) symlink, sz, 0, NULL);
++  if (err != GRUB_ERR_NONE)
++    {
++      grub_free (symlink);
++      return NULL;
++    }
++
++  symlink[sz] = '\0';
++  return symlink;
++}
++
++static struct grub_erofs_data *
++erofs_mount (grub_disk_t disk, bool read_root)
++{
++  struct grub_erofs_super sb;
++  grub_err_t err;
++  struct grub_erofs_data *data;
++  grub_uint32_t feature;
++
++  err = grub_disk_read (disk, EROFS_SUPER_OFFSET >> GRUB_DISK_SECTOR_BITS, 0,
++			sizeof (sb), &sb);
++  if (err != GRUB_ERR_NONE)
++    return NULL;
++  if (sb.magic != grub_cpu_to_le32_compile_time (EROFS_MAGIC) ||
++      grub_le_to_cpu32 (sb.log2_blksz) < EROFS_MIN_LOG2_BLOCK_SIZE ||
++      grub_le_to_cpu32 (sb.log2_blksz) > EROFS_MAX_LOG2_BLOCK_SIZE)
++    {
++      grub_error (GRUB_ERR_BAD_FS, "not a valid erofs filesystem");
++      return NULL;
++    }
++
++  feature = grub_le_to_cpu32 (sb.feature_incompat);
++  if (feature & ~EROFS_ALL_FEATURE_INCOMPAT)
++    {
++      grub_error (GRUB_ERR_BAD_FS, "unsupported features: 0x%x",
++		  feature & ~EROFS_ALL_FEATURE_INCOMPAT);
++      return NULL;
++    }
++
++  data = grub_malloc (sizeof (*data));
++  if (data == NULL)
++    return NULL;
++
++  data->disk = disk;
++  data->sb = sb;
++
++  if (read_root)
++    {
++      data->inode.data = data;
++      data->inode.ino = grub_le_to_cpu16 (sb.root_nid);
++      err = erofs_read_inode (data, &data->inode);
++      if (err != GRUB_ERR_NONE)
++	{
++	  grub_free (data);
++	  return NULL;
++	}
++    }
++
++  return data;
++}
++
++/* Context for grub_erofs_dir. */
++struct grub_erofs_dir_ctx
++{
++  grub_fs_dir_hook_t hook;
++  void *hook_data;
++  struct grub_erofs_data *data;
++};
++
++/* Helper for grub_erofs_dir. */
++static int
++erofs_dir_iter (const char *filename, enum grub_fshelp_filetype filetype,
++		grub_fshelp_node_t node, void *data)
++{
++  struct grub_erofs_dir_ctx *ctx = data;
++  struct grub_dirhook_info info = {0};
++  grub_err_t err;
++
++  if (node->inode_loaded == false)
++    {
++      err = erofs_read_inode (ctx->data, node);
++      if (err != GRUB_ERR_NONE)
++        return 0;
++    }
++
++  if (node->inode_loaded == true)
++    {
++      info.mtimeset = 1;
++      info.mtime = erofs_inode_mtime (node);
++    }
++
++  info.dir = ((filetype & GRUB_FSHELP_TYPE_MASK) == GRUB_FSHELP_DIR);
++  grub_free (node);
++  return ctx->hook (filename, &info, ctx->hook_data);
++}
++
++static grub_err_t
++grub_erofs_dir (grub_device_t device, const char *path, grub_fs_dir_hook_t hook,
++		void *hook_data)
++{
++  grub_fshelp_node_t fdiro = NULL;
++  grub_err_t err;
++  struct grub_erofs_dir_ctx ctx = {
++      .hook = hook,
++      .hook_data = hook_data
++  };
++
++  ctx.data = erofs_mount (device->disk, true);
++  if (ctx.data == NULL)
++    goto fail;
++
++  err = grub_fshelp_find_file (path, &ctx.data->inode, &fdiro, erofs_iterate_dir,
++			       erofs_read_symlink, GRUB_FSHELP_DIR);
++  if (err != GRUB_ERR_NONE)
++    goto fail;
++
++  erofs_iterate_dir (fdiro, erofs_dir_iter, &ctx);
++
++ fail:
++  if (fdiro != &ctx.data->inode)
++    grub_free (fdiro);
++  grub_free (ctx.data);
++
++  return grub_errno;
++}
++
++static grub_err_t
++grub_erofs_open (grub_file_t file, const char *name)
++{
++  struct grub_erofs_data *data;
++  struct grub_fshelp_node *fdiro = NULL;
++  grub_err_t err;
++
++  data = erofs_mount (file->device->disk, true);
++  if (data == NULL)
++    {
++      err = grub_errno;
++      goto fail;
++    }
++
++  err = grub_fshelp_find_file (name, &data->inode, &fdiro, erofs_iterate_dir,
++			       erofs_read_symlink, GRUB_FSHELP_REG);
++  if (err != GRUB_ERR_NONE)
++    goto fail;
++
++  if (fdiro->inode_loaded == false)
++    {
++      err = erofs_read_inode (data, fdiro);
++      if (err != GRUB_ERR_NONE)
++	goto fail;
++    }
++
++  grub_memcpy (&data->inode, fdiro, sizeof (*fdiro));
++  grub_free (fdiro);
++
++  file->data = data;
++  file->size = erofs_inode_file_size (&data->inode);
++
++  return GRUB_ERR_NONE;
++
++ fail:
++  if (fdiro != &data->inode)
++    grub_free (fdiro);
++  grub_free (data);
++
++  return err;
++}
++
++static grub_ssize_t
++grub_erofs_read (grub_file_t file, char *buf, grub_size_t len)
++{
++  struct grub_erofs_data *data = file->data;
++  struct grub_fshelp_node *inode = &data->inode;
++  grub_off_t off = file->offset;
++  grub_uint64_t ret = 0, file_size;
++  grub_err_t err;
++
++  if (inode->inode_loaded == false)
++    {
++      err = erofs_read_inode (data, inode);
++      if (err != GRUB_ERR_NONE)
++	return -1;
++    }
++
++  file_size = erofs_inode_file_size (inode);
++
++  if (off > file_size)
++    {
++      grub_error (GRUB_ERR_IO, "read past EOF @ inode %" PRIuGRUB_UINT64_T, inode->ino);
++      return -1;
++    }
++  if (off == file_size)
++    return 0;
++
++  if (off + len > file_size)
++    len = file_size - off;
++
++  err = erofs_read_raw_data (inode, (grub_uint8_t *) buf, len, off, &ret);
++  if (err != GRUB_ERR_NONE)
++    return -1;
++
++  return ret;
++}
++
++static grub_err_t
++grub_erofs_close (grub_file_t file)
++{
++  grub_free (file->data);
++
++  return GRUB_ERR_NONE;
++}
++
++static grub_err_t
++grub_erofs_uuid (grub_device_t device, char **uuid)
++{
++  struct grub_erofs_data *data;
++
++  data = erofs_mount (device->disk, false);
++  if (data == NULL)
++    {
++      *uuid = NULL;
++      return grub_errno;
++    }
++
++  *uuid = grub_xasprintf ("%pG", &data->sb.uuid);
++
++  grub_free (data);
++
++  return GRUB_ERR_NONE;
++}
++
++static grub_err_t
++grub_erofs_label (grub_device_t device, char **label)
++{
++  struct grub_erofs_data *data;
++
++  data = erofs_mount (device->disk, false);
++  if (data == NULL)
++    {
++      *label = NULL;
++      return grub_errno;
++    }
++
++  *label = grub_strndup ((char *) data->sb.volume_name, sizeof (data->sb.volume_name));
++  grub_free (data);
++
++  if (*label == NULL)
++    return grub_errno;
++  return GRUB_ERR_NONE;
++}
++
++static grub_err_t
++grub_erofs_mtime (grub_device_t device, grub_int64_t *tm)
++{
++  struct grub_erofs_data *data;
++
++  data = erofs_mount (device->disk, false);
++  if (data == NULL)
++    {
++      *tm = 0;
++      return grub_errno;
++    }
++
++  *tm = grub_le_to_cpu64 (data->sb.build_time);
++
++  grub_free (data);
++
++  return GRUB_ERR_NONE;
++}
++
++static struct grub_fs grub_erofs_fs = {
++    .name = "erofs",
++    .fs_dir = grub_erofs_dir,
++    .fs_open = grub_erofs_open,
++    .fs_read = grub_erofs_read,
++    .fs_close = grub_erofs_close,
++    .fs_uuid = grub_erofs_uuid,
++    .fs_label = grub_erofs_label,
++    .fs_mtime = grub_erofs_mtime,
++#ifdef GRUB_UTIL
++    .reserved_first_sector = 1,
++    .blocklist_install = 0,
++#endif
++    .next = 0,
++};
++
++GRUB_MOD_INIT (erofs)
++{
++  grub_fs_register (&grub_erofs_fs);
++}
++
++GRUB_MOD_FINI (erofs)
++{
++  grub_fs_unregister (&grub_erofs_fs);
++}
+-- 
+2.47.2
+
+
+From 56e58828cf3cd32ba4768779accc6655120c3136 Mon Sep 17 00:00:00 2001
+From: Yifan Zhao <zhaoyifan@sjtu.edu.cn>
+Date: Tue, 21 May 2024 01:20:59 +0800
+Subject: [PATCH 10/13] fs/erofs: Add tests for EROFS in grub-fs-tester
+
+This patch introduces three EROFS tests which cover compact, extended
+and chunk-based inodes respectively.
+
+Signed-off-by: Yifan Zhao <zhaoyifan@sjtu.edu.cn>
+Reviewed-by: Glenn Washburn <development@efficientek.com>
+Signed-off-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ .gitignore                   |  1 +
+ Makefile.util.def            |  6 ++++++
+ tests/erofs_test.in          | 20 ++++++++++++++++++++
+ tests/util/grub-fs-tester.in | 32 +++++++++++++++++++++++++-------
+ 4 files changed, 52 insertions(+), 7 deletions(-)
+ create mode 100644 tests/erofs_test.in
+
+diff --git a/.gitignore b/.gitignore
+index 11fcecf5c..4c1f91db8 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -104,6 +104,7 @@ widthspec.bin
+ /docs/version-dev.texi
+ /docs/version.texi
+ /ehci_test
++/erofs_test
+ /example_grub_script_test
+ /example_scripted_test
+ /example_unit_test
+diff --git a/Makefile.util.def b/Makefile.util.def
+index 8d3bc107f..0f74a1680 100644
+--- a/Makefile.util.def
++++ b/Makefile.util.def
+@@ -764,6 +764,12 @@ script = {
+   dependencies = 'garbage-gen$(BUILD_EXEEXT)';
+ };
+ 
++script = {
++  testcase = native;
++  name = erofs_test;
++  common = tests/erofs_test.in;
++};
++
+ script = {
+   testcase = native;
+   name = ext234_test;
+diff --git a/tests/erofs_test.in b/tests/erofs_test.in
+new file mode 100644
+index 000000000..51111627a
+--- /dev/null
++++ b/tests/erofs_test.in
+@@ -0,0 +1,20 @@
++#!@BUILD_SHEBANG@
++
++set -e
++
++if [ "x$EUID" = "x" ] ; then
++  EUID=`id -u`
++fi
++
++if [ "$EUID" != 0 ] ; then
++   exit 99
++fi
++
++if ! which mkfs.erofs >/dev/null 2>&1; then
++   echo "mkfs.erofs not installed; cannot test erofs."
++   exit 99
++fi
++
++"@builddir@/grub-fs-tester" erofs_compact
++"@builddir@/grub-fs-tester" erofs_extended
++"@builddir@/grub-fs-tester" erofs_chunk
+diff --git a/tests/util/grub-fs-tester.in b/tests/util/grub-fs-tester.in
+index ea8b2d1f6..df5dc7542 100644
+--- a/tests/util/grub-fs-tester.in
++++ b/tests/util/grub-fs-tester.in
+@@ -227,6 +227,10 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 	xsquash*)
+ 	    MINBLKSIZE=4096
+ 	    MAXBLKSIZE=1048576;;
++	x"erofs_"*)
++		MINBLKSIZE=4096
++		MAXBLKSIZE=4096
++		;;
+ 	xxfs|xf2fs)
+ 	    MINBLKSIZE=$SECSIZE
+ 	    # OS Limitation: GNU/Linux doesn't accept > 4096
+@@ -382,8 +386,8 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 		    FSLABEL="g;/_é䏌䐓䏕䎛䎾䏴кит u"
+ 		    #FSLABEL="g;/_é莭莽😁кит u"
+ 		    ;;
+-		# FS LIMITATION: reiserfs, extN and jfs label is at most 16 UTF-8 characters
+-		x"reiserfs_old" | x"reiserfs" | x"ext"* | x"lvm"* | x"luks"* | x"mdraid"* | x"jfs" | x"jfs_caseins")
++		# FS LIMITATION: reiserfs, extN, jfs and erofs label is at most 16 UTF-8 characters
++		x"reiserfs_old" | x"reiserfs" | x"ext"* | x"lvm"* | x"luks"* | x"mdraid"* | x"jfs" | x"jfs_caseins" | x"erofs_"*)
+ 		    FSLABEL="g;/éт 莭😁";;
+ 		# FS LIMITATION: No underscore, space, semicolon, slash or international characters in UFS* in label. Limited to 32 UTF-8 characters
+ 		x"ufs1" | x"ufs1_sun" | x"ufs2")
+@@ -661,7 +665,7 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 		x"tarfs" | x"cpio_"*| x"ziso9660" | x"romfs" | x"squash4_"*\
+ 		    | x"iso9660" | xjoliet | xrockridge | xrockridge_joliet \
+ 		    | x"iso9660_1999" | xjoliet_1999 | xrockridge_1999 \
+-		    | xrockridge_joliet_1999)
++		    | xrockridge_joliet_1999 | x"erofs_"*)
+ 		    MNTPOINTRW="$MASTER"
+ 		    MNTPOINTRO="$MASTER"
+ 		    mkdir -p "$MASTER";;
+@@ -805,7 +809,7 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 		    sleep 1
+ 		    "zfs" create "$FSLABEL"/"grub fs"
+ 		    sleep 1;;
+-		x"tarfs" | x"cpio_"* | x"iso9660" | xjoliet | xrockridge | xrockridge_joliet | x"iso9660_1999" | xjoliet_1999 | xrockridge_1999 | xrockridge_joliet_1999 | x"ziso9660" | x"romfs" | x"squash4_"*)
++		x"tarfs" | x"cpio_"* | x"iso9660" | xjoliet | xrockridge | xrockridge_joliet | x"iso9660_1999" | xjoliet_1999 | xrockridge_1999 | xrockridge_joliet_1999 | x"ziso9660" | x"romfs" | x"squash4_"* | x"erofs_"*)
+ 		    INSTDEVICE=/dev/null;;
+ 		x"reiserfs")
+ 		    "mkfs.reiserfs" --format=3.6 -b $BLKSIZE -l "$FSLABEL" -q "${MOUNTDEVICE}" ;;
+@@ -990,7 +994,7 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 		x"zfs"*)
+ 		    OSDIR="grub fs/"
+ 		    GRUBDIR="($GRUBDEVICE)/grub fs@";;
+-		x"tarfs" | x"cpio_"* | x"iso9660" | xjoliet | xrockridge | xrockridge_joliet | x"iso9660_1999" | xjoliet_1999 | xrockridge_1999 | xrockridge_joliet_1999 | x"ziso9660" | x"romfs" | x"squash4_"* | xafs)
++		x"tarfs" | x"cpio_"* | x"iso9660" | xjoliet | xrockridge | xrockridge_joliet | x"iso9660_1999" | xjoliet_1999 | xrockridge_1999 | xrockridge_joliet_1999 | x"ziso9660" | x"romfs" | x"squash4_"* | xafs | x"erofs_"*)
+ 		    ;;
+ 		*)
+ 		    if ! mount -t "$MOUNTFS" "${MOUNTDEVICE}" "$MNTPOINTRW" -o ${MOUNTOPTS}${SELINUXOPTS}rw  ; then
+@@ -1116,6 +1120,18 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 		xsquash4_*)
+ 		    echo mksquashfs "$MASTER" "${FSIMAGEP}0.img" -always-use-fragments -comp "${fs/squash4_/}" -b $BLKSIZE
+ 		    mksquashfs "$MASTER" "${FSIMAGEP}0.img" -always-use-fragments -comp "${fs/squash4_/}" -b $BLKSIZE ;;
++		x"erofs_compact")
++			echo mkfs.erofs -Eforce-inode-compact -L "$FSLABEL" "${FSIMAGEP}0.img" "$MNTPOINTRW"
++			mkfs.erofs -Eforce-inode-compact -L "$FSLABEL" "${FSIMAGEP}0.img" "$MNTPOINTRW"
++			;;
++		x"erofs_extended")
++			echo mkfs.erofs -Eforce-inode-extended -L "$FSLABEL" "${FSIMAGEP}0.img" "$MNTPOINTRW"
++			mkfs.erofs -Eforce-inode-extended -L "$FSLABEL" "${FSIMAGEP}0.img" "$MNTPOINTRW"
++			;;
++		x"erofs_chunk")
++			echo mkfs.erofs --chunksize=1048576 -L "$FSLABEL" "${FSIMAGEP}0.img" "$MNTPOINTRW"
++			mkfs.erofs --chunksize=1048576 -L "$FSLABEL" "${FSIMAGEP}0.img" "$MNTPOINTRW"
++			;;
+ 		x"bfs")
+ 		    sleep 1
+ 		    fusermount -u "$MNTPOINTRW"
+@@ -1187,6 +1203,8 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 		    ;;
+ 		xsquash4_*)
+ 		    ;;
++		x"erofs_"*)
++		    ;;
+ 		xlvm*)
+ 		    vgchange -a y grub_test
+ 		    sleep 1
+@@ -1624,7 +1642,7 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 			sleep 1;
+ 		    done
+ 		    sleep 5;;
+-		x"tarfs" | x"cpio_"* | xrockridge | xjoliet | xrockridge_joliet | x"ziso9660" | x"romfs" | x"squash4_"* | xiso9660 | xiso9660_1999 | xrockridge_1999 | xjoliet_1999 | xrockridge_joliet_1999)
++		x"tarfs" | x"cpio_"* | xrockridge | xjoliet | xrockridge_joliet | x"ziso9660" | x"romfs" | x"squash4_"* | xiso9660 | xiso9660_1999 | xrockridge_1999 | xjoliet_1999 | xrockridge_joliet_1999 | x"erofs_"*)
+ 		    rm -rf "$MNTPOINTRW";;
+ 		x"afs")
+ 		    rm -rf "$MNTPOINTRO"
+@@ -1651,7 +1669,7 @@ for LOGSECSIZE in $(range "$MINLOGSECSIZE" "$MAXLOGSECSIZE" 1); do
+ 		    ;;
+ 	    esac
+ 	    case x"$fs" in
+-		x"tarfs" | x"cpio_"* | x"iso9660" | xrockridge | xjoliet | xrockridge_joliet | x"ziso9660" | x"romfs" | x"squash4_"* | x"iso9660_1999" | xrockridge_1999 | xjoliet_1999 | xrockridge_joliet_1999) ;;
++		x"tarfs" | x"cpio_"* | x"iso9660" | xrockridge | xjoliet | xrockridge_joliet | x"ziso9660" | x"romfs" | x"squash4_"* | x"iso9660_1999" | xrockridge_1999 | xjoliet_1999 | xrockridge_joliet_1999 | x"erofs_"*) ;;
+ 		*)
+ 		    for lodev in $LODEVICES; do
+ 			while ! losetup -d "$lodev"; do
+-- 
+2.47.2
+
+
+From 7085d61bf391fd7e6bd0a461a2fb33c815e1e0e6 Mon Sep 17 00:00:00 2001
+From: kbader94 <kyle.bader94@gmail.com>
+Date: Tue, 28 May 2024 17:40:35 -0600
+Subject: [PATCH 11/13] dirty 2d
+
+modify the dirty function so it tracks and updates 2d regions instead of just
+the y coordinates.
+
+ Changes to be committed:
+	modified:   grub-core/video/fb/video_fb.c
+---
+ grub-core/video/fb/video_fb.c | 199 +++++++++++++++++++++-------------
+ 1 file changed, 122 insertions(+), 77 deletions(-)
+
+diff --git a/grub-core/video/fb/video_fb.c b/grub-core/video/fb/video_fb.c
+index fa4ebde26..d17c47b11 100644
+--- a/grub-core/video/fb/video_fb.c
++++ b/grub-core/video/fb/video_fb.c
+@@ -31,13 +31,6 @@ GRUB_MOD_LICENSE ("GPLv3+");
+ 
+ typedef grub_err_t (*grub_video_fb_doublebuf_update_screen_t) (void);
+ typedef volatile void *framebuf_t;
+-
+-struct dirty
+-{
+-  int first_line;
+-  int last_line;
+-};
+-
+ static struct
+ {
+   struct grub_video_fbrender_target *render_target;
+@@ -47,8 +40,8 @@ static struct
+ 
+   unsigned int palette_size;
+ 
+-  struct dirty current_dirty;
+-  struct dirty previous_dirty;
++  struct grub_video_rect current_dirty;
++  struct grub_video_rect previous_dirty;
+ 
+   /* For page flipping strategy.  */
+   int displayed_page;           /* The page # that is the front buffer.  */
+@@ -831,14 +824,36 @@ grub_video_fb_unmap_color_int (struct grub_video_fbblit_info * source,
+ }
+ 
+ static void
+-dirty (int y, int height)
++dirty (int x, int y, int width, int height)
+ {
++  
++  grub_video_rect_t *current_dirty = &framebuffer.current_dirty;
++  grub_video_rect_t dirty_rect = {
++    .x = x,
++    .y = y,
++    .width = width,
++    .height = height
++  };
++
+   if (framebuffer.render_target != framebuffer.back_target)
+     return;
+-  if (framebuffer.current_dirty.first_line > y)
+-    framebuffer.current_dirty.first_line = y;
+-  if (framebuffer.current_dirty.last_line < y + height)
+-    framebuffer.current_dirty.last_line = y + height;
++
++  /* extend dirty_rect bounds if dirty x min is less than current x */
++  if (dirty_rect.x < current_dirty->x) 
++    current_dirty->x = dirty_rect.x;
++
++  /* extend dirty_rect bounds if dirty x max is greater than current width */
++  if (dirty_rect.x + dirty_rect.width > current_dirty->x + current_dirty->width)
++    current_dirty->width = (dirty_rect.x + dirty_rect.width) - current_dirty->x;
++
++  /* extend dirty_rect bounds if dirty y min is less than current y */
++  if (dirty_rect.y < current_dirty->y)
++    current_dirty->y = dirty_rect.y;
++
++  /* extend dirty_rect bounds if dirty y max is greater than current height */
++  if (dirty_rect.y + dirty_rect.height > current_dirty->y + current_dirty->height)
++    current_dirty->height = (dirty_rect.y + dirty_rect.height) - current_dirty->y;
++
+ }
+ 
+ grub_err_t
+@@ -896,7 +911,7 @@ grub_video_fb_fill_rect (grub_video_color_t color, int x, int y,
+   x += area_x;
+   y += area_y;
+ 
+-  dirty (y, height);
++  dirty (x, y, width, height);
+ 
+   /* Use fbblit_info to encapsulate rendering.  */
+   target.mode_info = &framebuffer.render_target->mode_info;
+@@ -1008,8 +1023,7 @@ grub_video_fb_blit_source (struct grub_video_fbblit_info *source,
+   target.mode_info = &framebuffer.render_target->mode_info;
+   target.data = framebuffer.render_target->data;
+ 
+-  /* Do actual blitting.  */
+-  dirty (y, height);
++  dirty (x, y, width, height);
+   grub_video_fb_dispatch_blit (&target, source, oper, x, y, width, height,
+                                offset_x, offset_y);
+ 
+@@ -1061,7 +1075,9 @@ grub_video_fb_scroll (grub_video_color_t color, int dx, int dy)
+   width = framebuffer.render_target->viewport.width - grub_abs (dx);
+   height = framebuffer.render_target->viewport.height - grub_abs (dy);
+ 
+-  dirty (framebuffer.render_target->viewport.y,
++  dirty (framebuffer.render_target->viewport.x,
++	 framebuffer.render_target->viewport.y,
++   framebuffer.render_target->viewport.width,
+ 	 framebuffer.render_target->viewport.height);
+ 
+   if (dx < 0)
+@@ -1416,28 +1432,33 @@ grub_video_fb_get_active_render_target (struct grub_video_fbrender_target **targ
+ static grub_err_t
+ doublebuf_blit_update_screen (void)
+ {
+-  if (framebuffer.current_dirty.first_line
+-      <= framebuffer.current_dirty.last_line)
+-    {
+-      grub_size_t copy_size;
+-
+-      if (grub_sub (framebuffer.current_dirty.last_line,
+-		    framebuffer.current_dirty.first_line, &copy_size) ||
+-	  grub_mul (framebuffer.back_target->mode_info.pitch, copy_size, &copy_size))
+-	{
+-	  /* Shouldn't happen, but if it does we've a bug. */
+-	  return GRUB_ERR_BUG;
+-	}
+-
+-      grub_memcpy ((char *) framebuffer.pages[0] + framebuffer.current_dirty.first_line *
+-		   framebuffer.back_target->mode_info.pitch,
+-		   (char *) framebuffer.back_target->data + framebuffer.current_dirty.first_line *
+-		   framebuffer.back_target->mode_info.pitch,
+-		   copy_size);
++  if (framebuffer.current_dirty.height > 0 || framebuffer.current_dirty.width > 0) {
++    /* dirty row size in bytes */
++    grub_size_t row_size = framebuffer.current_dirty.width 
++                           * framebuffer.back_target->mode_info.bytes_per_pixel;
++
++    /* address of dirty_rect origin on render target */
++    char *src_base = (char *)framebuffer.back_target->data + framebuffer.current_dirty.y
++                      * framebuffer.back_target->mode_info.pitch + framebuffer.current_dirty.x
++                      * framebuffer.back_target->mode_info.bytes_per_pixel;
++
++    /* address of dirty_rect origin on display target */
++    char *dst_base = (char *)framebuffer.pages[0] + framebuffer.current_dirty.y
++                      * framebuffer.back_target->mode_info.pitch + framebuffer.current_dirty.x
++                      * framebuffer.back_target->mode_info.bytes_per_pixel;
++
++    /* blit each row from render_target to display */
++    grub_size_t pitch = framebuffer.back_target->mode_info.pitch;
++    for (unsigned int y = 0; y < framebuffer.current_dirty.height; y++) {
++      grub_memcpy(dst_base + y * pitch, src_base + y * pitch, row_size);
+     }
+-  framebuffer.current_dirty.first_line
+-    = framebuffer.back_target->mode_info.height;
+-  framebuffer.current_dirty.last_line = 0;
++  }
++
++  /* reset current_dirty rect */
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.height = 0;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.width = 0;
+ 
+   return GRUB_ERR_NONE;
+ }
+@@ -1470,8 +1491,10 @@ grub_video_fb_doublebuf_blit_init (struct grub_video_fbrender_target **back,
+   framebuffer.pages[0] = framebuf;
+   framebuffer.displayed_page = 0;
+   framebuffer.render_page = 0;
+-  framebuffer.current_dirty.first_line = mode_info.height;
+-  framebuffer.current_dirty.last_line = 0;
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.height = 0;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.width = 0;
+ 
+   return GRUB_ERR_NONE;
+ }
+@@ -1481,37 +1504,52 @@ doublebuf_pageflipping_update_screen (void)
+ {
+   int new_displayed_page;
+   grub_err_t err;
+-  int first_line, last_line;
+-
+-  first_line = framebuffer.current_dirty.first_line;
+-  last_line = framebuffer.current_dirty.last_line;
+-  if (first_line > framebuffer.previous_dirty.first_line)
+-    first_line = framebuffer.previous_dirty.first_line;
+-  if (last_line < framebuffer.previous_dirty.last_line)
+-    last_line = framebuffer.previous_dirty.last_line;
+ 
+-  if (first_line <= last_line)
+-    {
+-      grub_size_t copy_size;
+-
+-      if (grub_sub (last_line, first_line, &copy_size) ||
+-	  grub_mul (framebuffer.back_target->mode_info.pitch, copy_size, &copy_size))
+-	{
+-	  /* Shouldn't happen, but if it does we've a bug. */
+-	  return GRUB_ERR_BUG;
+-	}
+-
+-      grub_memcpy ((char *) framebuffer.pages[framebuffer.render_page] + first_line *
+-		   framebuffer.back_target->mode_info.pitch,
+-		   (char *) framebuffer.back_target->data + first_line *
+-		   framebuffer.back_target->mode_info.pitch,
+-		   copy_size);
++  /* compare current and previous dirty_rects, and use greatest extents */
++  unsigned int min_x = framebuffer.current_dirty.x;
++  unsigned int min_y = framebuffer.current_dirty.y;
++  unsigned int max_x = framebuffer.current_dirty.x + framebuffer.current_dirty.width;
++  unsigned int max_y = framebuffer.current_dirty.y + framebuffer.current_dirty.height;  
++  if (framebuffer.previous_dirty.x < min_x)
++    min_x = framebuffer.previous_dirty.x;
++  if (framebuffer.previous_dirty.y < min_y)
++    min_y = framebuffer.previous_dirty.y;
++  if (framebuffer.previous_dirty.x + framebuffer.previous_dirty.width > max_x)
++    max_x = framebuffer.previous_dirty.x + framebuffer.previous_dirty.width;
++  if (framebuffer.previous_dirty.y + framebuffer.previous_dirty.height > max_y)
++    max_y = framebuffer.previous_dirty.y + framebuffer.previous_dirty.height;
++  int dirty_width = max_x - min_x;
++  int dirty_height = max_y - min_y;
++
++  /* check if there is anything to do */
++  if (dirty_width > 0 && dirty_height > 0) {
++    /* byte size of dirty row */
++    grub_size_t row_size = dirty_width 
++                          * framebuffer.back_target->mode_info.bytes_per_pixel;
++
++    /* render target base address */
++    char *src_base = (char *)framebuffer.back_target->data + min_y
++                      * framebuffer.back_target->mode_info.pitch + min_x 
++                      * framebuffer.back_target->mode_info.bytes_per_pixel;
++
++    /* display target base address */
++    char *dst_base = (char *)framebuffer.pages[framebuffer.render_page] + min_y 
++                      * framebuffer.back_target->mode_info.pitch + min_x
++                      * framebuffer.back_target->mode_info.bytes_per_pixel;
++
++    /* blit each row from render_target to display */
++    grub_size_t pitch = framebuffer.back_target->mode_info.pitch;
++    for (int y = 0; y < dirty_height; y++) {
++      grub_memcpy(dst_base + y * pitch, src_base + y * pitch, row_size);
+     }
++  }
+ 
++  /* reset current_dirty rect */
+   framebuffer.previous_dirty = framebuffer.current_dirty;
+-  framebuffer.current_dirty.first_line
+-    = framebuffer.back_target->mode_info.height;
+-  framebuffer.current_dirty.last_line = 0;
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.height = 0;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.width = 0;
+ 
+   /* Swap the page numbers in the framebuffer struct.  */
+   new_displayed_page = framebuffer.render_page;
+@@ -1570,12 +1608,17 @@ doublebuf_pageflipping_init (struct grub_video_mode_info *mode_info,
+   framebuffer.pages[0] = page0_ptr;
+   framebuffer.pages[1] = page1_ptr;
+ 
+-  framebuffer.current_dirty.first_line
+-    = framebuffer.back_target->mode_info.height;
+-  framebuffer.current_dirty.last_line = 0;
+-  framebuffer.previous_dirty.first_line
+-    = framebuffer.back_target->mode_info.height;
+-  framebuffer.previous_dirty.last_line = 0;
++  /* reset current_dirty rect */
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.height = 0;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.width = 0;
++
++   /* reset previous_dirty rect */
++  framebuffer.previous_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.previous_dirty.height = 0;
++  framebuffer.previous_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.previous_dirty.width = 0;
+ 
+   /* Set the framebuffer memory data pointer and display the right page.  */
+   err = set_page_in (framebuffer.displayed_page);
+@@ -1661,9 +1704,11 @@ grub_video_fb_setup (unsigned int mode_type, unsigned int mode_mask,
+   framebuffer.displayed_page = 0;
+   framebuffer.render_page = 0;
+   framebuffer.set_page = 0;
+-  framebuffer.current_dirty.first_line
+-    = framebuffer.back_target->mode_info.height;
+-  framebuffer.current_dirty.last_line = 0;
++ /* reset transformed_add_rect */
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.height = 0;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.width = 0;
+ 
+   mode_info->mode_type &= ~GRUB_VIDEO_MODE_TYPE_DOUBLE_BUFFERED;
+ 
+-- 
+2.47.2
+
+
+From 33a78e50407aec423c1fcda7672a72a539dc5b59 Mon Sep 17 00:00:00 2001
+From: kbader94 <kyle.bader94@gmail.com>
+Date: Tue, 28 May 2024 19:38:58 -0600
+Subject: [PATCH 12/13] framebuffer rotation
+
+---
+ grub-core/video/fb/fbblit.c   |  71 ++++++++++++++++++++--
+ grub-core/video/fb/fbfill.c   |  28 ++++++---
+ grub-core/video/fb/fbutil.c   |  61 +++++++++++++++++++
+ grub-core/video/fb/video_fb.c | 107 +++++++++++++++++++++++-----------
+ include/grub/fbutil.h         |   9 +++
+ include/grub/video.h          |  20 ++++++-
+ 6 files changed, 247 insertions(+), 49 deletions(-)
+
+diff --git a/grub-core/video/fb/fbblit.c b/grub-core/video/fb/fbblit.c
+index 1010ef393..5dda0ffdb 100644
+--- a/grub-core/video/fb/fbblit.c
++++ b/grub-core/video/fb/fbblit.c
+@@ -62,7 +62,8 @@ grub_video_fbblit_replace (struct grub_video_fbblit_info *dst,
+ 	  dst_color = grub_video_fb_map_rgba (src_red, src_green,
+ 					      src_blue, src_alpha);
+ 
+-	  set_pixel (dst, x + i, y + j, dst_color);
++	  set_pixel (dst, x + trans_x(i, j, dst->mode_info), 
++               y + trans_y(i,j, dst->mode_info), dst_color);
+ 	}
+     }
+ }
+@@ -1195,11 +1196,11 @@ grub_video_fbblit_blend (struct grub_video_fbblit_info *dst,
+             {
+               dst_color = grub_video_fb_map_rgba (src_red, src_green,
+ 						  src_blue, src_alpha);
+-              set_pixel (dst, x + i, y + j, dst_color);
++              set_pixel (dst, x + trans_x(i, j, dst->mode_info), y + trans_y(i,j, dst->mode_info), dst_color);
+               continue;
+             }
+ 
+-          dst_color = get_pixel (dst, x + i, y + j);
++          dst_color = get_pixel (dst, x + trans_x(i, j, dst->mode_info), y + trans_y(i,j, dst->mode_info));
+ 
+           grub_video_fb_unmap_color_int (dst, dst_color, &dst_red,
+ 					 &dst_green, &dst_blue, &dst_alpha);
+@@ -1212,7 +1213,7 @@ grub_video_fbblit_blend (struct grub_video_fbblit_info *dst,
+           dst_color = grub_video_fb_map_rgba (dst_red, dst_green, dst_blue,
+ 					      dst_alpha);
+ 
+-          set_pixel (dst, x + i, y + j, dst_color);
++          set_pixel (dst, x + trans_x(i, j, dst->mode_info), y + trans_y(i,j, dst->mode_info), dst_color);
+         }
+     }
+ }
+@@ -1936,6 +1937,68 @@ grub_video_fb_dispatch_blit (struct grub_video_fbblit_info *target,
+ 			     unsigned int width, unsigned int height,
+ 			     int offset_x, int offset_y)
+ {
++  if (target->mode_info->rotation == GRUB_VIDEO_ROTATE_90)
++    {
++      int nx = y;
++      int ny = target->mode_info->width - x - 1;
++      if (oper == GRUB_VIDEO_BLIT_REPLACE)
++	{
++	  /* No optimized replace operator found, use default (slow) blitter.  */
++	  grub_video_fbblit_replace (target, source, nx, ny, width, height,
++					offset_x, offset_y);
++	  return;
++	}
++      else
++	{
++	  /* No optimized replace operator found, use default (slow) blitter.  */
++	  grub_video_fbblit_blend (target, source, nx, ny, width, height,
++				      offset_x, offset_y);
++	  return;
++	}
++    }
++
++  if (target->mode_info->rotation == GRUB_VIDEO_ROTATE_180)
++    {
++      int nx = target->mode_info->width - x - 1;
++      int ny = target->mode_info->height - y - 1;
++      if (oper == GRUB_VIDEO_BLIT_REPLACE)
++	{
++	  /* No optimized replace operator found, use default (slow) blitter.  */
++	  grub_video_fbblit_replace (target, source, nx, ny, width, height,
++					 offset_x, offset_y);
++	  return;
++	}
++      else
++	{
++	  /* No optimized replace operator found, use default (slow) blitter.  */
++	  grub_video_fbblit_blend (target, source, nx, ny, width, height,
++				       offset_x, offset_y);
++	  return;
++	}
++
++      
++    }
++
++  if (target->mode_info->rotation == GRUB_VIDEO_ROTATE_270)
++    {
++      int nx = target->mode_info->height - y - 1;
++      int ny = x;
++      if (oper == GRUB_VIDEO_BLIT_REPLACE)
++	{
++	  /* No optimized replace operator found, use default (slow) blitter.  */
++	  grub_video_fbblit_replace (target, source, nx, ny, width, height,
++					 offset_x, offset_y);
++	  return;
++	}
++      else
++	{
++	  /* No optimized replace operator found, use default (slow) blitter.  */
++	  grub_video_fbblit_blend (target, source, nx, ny, width, height,
++				       offset_x, offset_y);
++	  return;
++	}
++    }
++
+   if (oper == GRUB_VIDEO_BLIT_REPLACE)
+     {
+       /* Try to figure out more optimized version for replace operator.  */
+diff --git a/grub-core/video/fb/fbfill.c b/grub-core/video/fb/fbfill.c
+index 49fa16b92..cab4d8acc 100644
+--- a/grub-core/video/fb/fbfill.c
++++ b/grub-core/video/fb/fbfill.c
+@@ -185,28 +185,38 @@ grub_video_fb_fill_dispatch (struct grub_video_fbblit_info *target,
+ 			     grub_video_color_t color, int x, int y,
+ 			     unsigned int width, unsigned int height)
+ {
++  grub_video_rect_t orig = {
++    .x = x,
++    .y = y,
++    .width = width,
++    .height = height
++  };
++  grub_video_rect_t tran = grub_video_transform_rectangle (orig, target->mode_info);
++  
+   /* Try to figure out more optimized version.  Note that color is already
+      mapped to target format so we can make assumptions based on that.  */
+   switch (target->mode_info->bytes_per_pixel)
+     {
+     case 4:
+-      grub_video_fbfill_direct32 (target, color, x, y,
+-				  width, height);
++      grub_video_fbfill_direct32 (target, color, tran.x, tran.y,
++				  tran.width, tran.height);
+       return;
+     case 3:
+-      grub_video_fbfill_direct24 (target, color, x, y,
+-				  width, height);
++      grub_video_fbfill_direct24 (target, color, tran.x, tran.y,
++				  tran.width, tran.height);
++      return;
+       return;
+     case 2:
+-      grub_video_fbfill_direct16 (target, color, x, y,
+-                                        width, height);
++      grub_video_fbfill_direct16 (target, color, tran.x, tran.y,
++				  tran.width, tran.height);
+       return;
+     case 1:
+-      grub_video_fbfill_direct8 (target, color, x, y,
+-				       width, height);
++      grub_video_fbfill_direct8 (target, color, tran.x, tran.y,
++				  tran.width, tran.height);
+       return;
+     }
+ 
+   /* No optimized version found, use default (slow) filler.  */
+-  grub_video_fbfill (target, color, x, y, width, height);
++  grub_video_fbfill  (target, color, tran.x, tran.y,
++				  tran.width, tran.height);
+ }
+diff --git a/grub-core/video/fb/fbutil.c b/grub-core/video/fb/fbutil.c
+index 25ef39f47..368356fd7 100644
+--- a/grub-core/video/fb/fbutil.c
++++ b/grub-core/video/fb/fbutil.c
+@@ -149,3 +149,64 @@ set_pixel (struct grub_video_fbblit_info *source,
+       break;
+     }
+ }
++
++int 
++trans_x(int x,int y, struct grub_video_mode_info *mode_info)
++{
++    switch (mode_info->rotation) {
++        case GRUB_VIDEO_ROTATE_90:
++            return y;
++        case GRUB_VIDEO_ROTATE_180:
++            return -x;
++        case GRUB_VIDEO_ROTATE_270:
++            return -y;
++        case GRUB_VIDEO_ROTATE_NONE:
++        default:
++            return x;
++    }
++}
++
++int 
++trans_y(int x, int y, struct grub_video_mode_info *mode_info)
++{
++    switch (mode_info->rotation) {
++        case GRUB_VIDEO_ROTATE_90:
++            return -x;
++        case GRUB_VIDEO_ROTATE_180:
++            return -y;
++        case GRUB_VIDEO_ROTATE_270:
++            return x;
++        case GRUB_VIDEO_ROTATE_NONE:
++        default:
++            return y;
++    }
++}
++
++grub_video_rect_t grub_video_transform_rectangle (grub_video_rect_t r, const struct grub_video_mode_info *mode_info)
++{
++  grub_video_rect_t n;
++  switch (mode_info->rotation)
++    {
++    case GRUB_VIDEO_ROTATE_NONE:
++      return r;
++    case GRUB_VIDEO_ROTATE_90:
++      n.width = r.height;
++      n.height = r.width;
++      n.x = r.y;
++      n.y = mode_info->width - r.x - r.width;
++      return n;
++    case GRUB_VIDEO_ROTATE_180:
++      n.width = r.width;
++      n.height = r.height;
++      n.x = mode_info->width - r.x - r.width;
++      n.y = mode_info->height - r.y - r.height;
++      return n;
++    case GRUB_VIDEO_ROTATE_270:
++      n.width = r.height;
++      n.height = r.width;
++      n.x = mode_info->height - r.y - r.height;
++      n.y = r.x;
++      return n;
++    }
++  return r;
++}
+\ No newline at end of file
+diff --git a/grub-core/video/fb/video_fb.c b/grub-core/video/fb/video_fb.c
+index d17c47b11..377a9179d 100644
+--- a/grub-core/video/fb/video_fb.c
++++ b/grub-core/video/fb/video_fb.c
+@@ -26,6 +26,7 @@
+ #include <grub/bitmap.h>
+ #include <grub/dl.h>
+ #include <grub/safemath.h>
++#include <grub/env.h>
+ 
+ GRUB_MOD_LICENSE ("GPLv3+");
+ 
+@@ -826,15 +827,17 @@ grub_video_fb_unmap_color_int (struct grub_video_fbblit_info * source,
+ static void
+ dirty (int x, int y, int width, int height)
+ {
+-  
++
+   grub_video_rect_t *current_dirty = &framebuffer.current_dirty;
+-  grub_video_rect_t dirty_rect = {
++  grub_video_rect_t additive_rect = {
+     .x = x,
+     .y = y,
+     .width = width,
+     .height = height
+   };
+ 
++  grub_video_rect_t dirty_rect = grub_video_transform_rectangle (additive_rect, &framebuffer.render_target->mode_info);
++
+   if (framebuffer.render_target != framebuffer.back_target)
+     return;
+ 
+@@ -1063,6 +1066,8 @@ grub_video_fb_scroll (grub_video_color_t color, int dx, int dy)
+ {
+   int width;
+   int height;
++  int tx; /* transformed scroll coords */
++  int ty; /* transformed scroll coords */
+   int src_x;
+   int src_y;
+   int dst_x;
+@@ -1072,39 +1077,41 @@ grub_video_fb_scroll (grub_video_color_t color, int dx, int dy)
+   if ((dx == 0) && (dy == 0))
+     return GRUB_ERR_NONE;
+ 
+-  width = framebuffer.render_target->viewport.width - grub_abs (dx);
+-  height = framebuffer.render_target->viewport.height - grub_abs (dy);
++  tx = trans_x(dx,dy, &framebuffer.render_target->mode_info);
++  ty = trans_y(dx,dy, &framebuffer.render_target->mode_info);
++  width = framebuffer.render_target->mode_info.original_width - grub_abs (tx);
++  height = framebuffer.render_target->mode_info.original_height - grub_abs (ty);
+ 
+   dirty (framebuffer.render_target->viewport.x,
+ 	 framebuffer.render_target->viewport.y,
+-   framebuffer.render_target->viewport.width,
++	 framebuffer.render_target->viewport.width,
+ 	 framebuffer.render_target->viewport.height);
+ 
+-  if (dx < 0)
++  if (tx < 0)
+     {
+-      src_x = framebuffer.render_target->viewport.x - dx;
++      src_x = framebuffer.render_target->viewport.x - tx;
+       dst_x = framebuffer.render_target->viewport.x;
+     }
+   else
+     {
+       src_x = framebuffer.render_target->viewport.x;
+-      dst_x = framebuffer.render_target->viewport.x + dx;
++      dst_x = framebuffer.render_target->viewport.x + tx;
+     }
+ 
+-  if (dy < 0)
++  if (ty < 0)
+     {
+-      src_y = framebuffer.render_target->viewport.y - dy;
++      src_y = framebuffer.render_target->viewport.y - ty;
+       dst_y = framebuffer.render_target->viewport.y;
+     }
+   else
+     {
+       src_y = framebuffer.render_target->viewport.y;
+-      dst_y = framebuffer.render_target->viewport.y + dy;
++      dst_y = framebuffer.render_target->viewport.y + ty;
+     }
+ 
+   /* 2. Check if there is need to copy data.  */
+-  if ((grub_abs (dx) < framebuffer.render_target->viewport.width)
+-       && (grub_abs (dy) < framebuffer.render_target->viewport.height))
++  if ((grub_abs (tx) < framebuffer.render_target->viewport.width)
++       && (grub_abs (ty) < framebuffer.render_target->viewport.height))
+     {
+       /* 3. Move data in render target.  */
+       struct grub_video_fbblit_info target;
+@@ -1119,7 +1126,7 @@ grub_video_fb_scroll (grub_video_color_t color, int dx, int dy)
+       linelen = width * target.mode_info->bytes_per_pixel;
+ #define DO_SCROLL                                                    \
+       /* Check vertical direction of the move.  */                   \
+-      if (dy < 0 || (dy == 0 && dx < 0))                             \
++      if (ty < 0 || (ty == 0 && tx < 0))                             \
+ 	{                                                            \
+ 	  dst = (void *) grub_video_fb_get_video_ptr (&target,       \
+ 						      dst_x, dst_y); \
+@@ -1245,6 +1252,9 @@ grub_video_fb_create_render_target (struct grub_video_fbrender_target **result,
+   /* TODO: Implement other types too.
+      Currently only 32bit render targets are supported.  */
+ 
++/* only used by text_layers, so do not rotate */
++  target->mode_info.rotation = GRUB_VIDEO_ROTATE_NONE;
++
+   /* Mark render target as allocated.  */
+   target->is_allocated = 1;
+ 
+@@ -1270,6 +1280,8 @@ grub_video_fb_create_render_target (struct grub_video_fbrender_target **result,
+   /* Setup render target format.  */
+   target->mode_info.width = width;
+   target->mode_info.height = height;
++  target->mode_info.original_width = width;
++  target->mode_info.original_height = height;
+   switch (mode_type)
+     {
+     case GRUB_VIDEO_MODE_TYPE_INDEX_COLOR
+@@ -1332,6 +1344,7 @@ grub_video_fb_create_render_target_from_pointer (struct grub_video_fbrender_targ
+ {
+   struct grub_video_fbrender_target *target;
+   unsigned y;
++  const char *rot_env;
+ 
+ #ifndef GRUB_HAVE_UNALIGNED_ACCESS
+   if (!(mode_info->bytes_per_pixel & (mode_info->bytes_per_pixel - 1))
+@@ -1352,30 +1365,53 @@ grub_video_fb_create_render_target_from_pointer (struct grub_video_fbrender_targ
+   target->data = ptr;
+ 
+   grub_memcpy (&(target->mode_info), mode_info, sizeof (target->mode_info));
++  rot_env = grub_env_get("rotation");
++
++  if (!rot_env) {
++        target->mode_info.rotation = GRUB_VIDEO_ROTATE_NONE;
++    } else if (grub_strcmp(rot_env, "90") == 0) {
++        target->mode_info.rotation = GRUB_VIDEO_ROTATE_90;
++    } else if (grub_strcmp(rot_env, "180") == 0) {
++        target->mode_info.rotation = GRUB_VIDEO_ROTATE_180;
++    } else if (grub_strcmp(rot_env, "270") == 0) {
++        target->mode_info.rotation = GRUB_VIDEO_ROTATE_270;
++    } else {
++        target->mode_info.rotation = GRUB_VIDEO_ROTATE_NONE;
++    }
++
++  target->mode_info.original_width = mode_info->width;
++  target->mode_info.original_height = mode_info->height;
++
++  if (target->mode_info.rotation == GRUB_VIDEO_ROTATE_90
++      || target->mode_info.rotation == GRUB_VIDEO_ROTATE_270)
++    {
++      target->mode_info.width = target->mode_info.original_height;
++      target->mode_info.height = target->mode_info.original_width;
++    }
+ 
+   /* Reset viewport, region and area to match new mode.  */
+   target->viewport.x = 0;
+   target->viewport.y = 0;
+-  target->viewport.width = mode_info->width;
+-  target->viewport.height = mode_info->height;
++  target->viewport.width = target->mode_info.width;
++  target->viewport.height = target->mode_info.height;
+ 
+   target->region.x = 0;
+   target->region.y = 0;
+-  target->region.width = mode_info->width;
+-  target->region.height = mode_info->height;
++  target->region.width = target->mode_info.width;
++  target->region.height = target->mode_info.height;
+ 
+   target->area_enabled = 0;
+   target->area.x = 0;
+   target->area.y = 0;
+-  target->area.width = mode_info->width;
+-  target->area.height = mode_info->height;
++  target->area.width = target->mode_info.width;
++  target->area.height = target->mode_info.height;
+   target->area_offset_x = 0;
+   target->area_offset_y = 0;
+ 
+   /* Clear render target with black and maximum transparency.  */
+-  for (y = 0; y < mode_info->height; y++)
++  for (y = 0; y < target->mode_info.original_height; y++)
+     grub_memset (target->data + mode_info->pitch * y, 0,
+-		 mode_info->bytes_per_pixel * mode_info->width);
++		 mode_info->bytes_per_pixel * target->mode_info.original_width);
+ 
+   /* Save result to caller.  */
+   *result = target;
+@@ -1455,9 +1491,9 @@ doublebuf_blit_update_screen (void)
+   }
+ 
+   /* reset current_dirty rect */
+-  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.original_height;
+   framebuffer.current_dirty.height = 0;
+-  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.original_width;
+   framebuffer.current_dirty.width = 0;
+ 
+   return GRUB_ERR_NONE;
+@@ -1491,9 +1527,9 @@ grub_video_fb_doublebuf_blit_init (struct grub_video_fbrender_target **back,
+   framebuffer.pages[0] = framebuf;
+   framebuffer.displayed_page = 0;
+   framebuffer.render_page = 0;
+-  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.original_height;
+   framebuffer.current_dirty.height = 0;
+-  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.original_width;
+   framebuffer.current_dirty.width = 0;
+ 
+   return GRUB_ERR_NONE;
+@@ -1546,9 +1582,9 @@ doublebuf_pageflipping_update_screen (void)
+ 
+   /* reset current_dirty rect */
+   framebuffer.previous_dirty = framebuffer.current_dirty;
+-  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.original_height;
+   framebuffer.current_dirty.height = 0;
+-  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.original_width;
+   framebuffer.current_dirty.width = 0;
+ 
+   /* Swap the page numbers in the framebuffer struct.  */
+@@ -1609,15 +1645,15 @@ doublebuf_pageflipping_init (struct grub_video_mode_info *mode_info,
+   framebuffer.pages[1] = page1_ptr;
+ 
+   /* reset current_dirty rect */
+-  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.original_height;
+   framebuffer.current_dirty.height = 0;
+-  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.original_width;
+   framebuffer.current_dirty.width = 0;
+ 
+    /* reset previous_dirty rect */
+-  framebuffer.previous_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.previous_dirty.y = framebuffer.back_target->mode_info.original_height;
+   framebuffer.previous_dirty.height = 0;
+-  framebuffer.previous_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.previous_dirty.x = framebuffer.back_target->mode_info.original_width;
+   framebuffer.previous_dirty.width = 0;
+ 
+   /* Set the framebuffer memory data pointer and display the right page.  */
+@@ -1705,9 +1741,9 @@ grub_video_fb_setup (unsigned int mode_type, unsigned int mode_mask,
+   framebuffer.render_page = 0;
+   framebuffer.set_page = 0;
+  /* reset transformed_add_rect */
+-  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.height;
++  framebuffer.current_dirty.y = framebuffer.back_target->mode_info.original_height;
+   framebuffer.current_dirty.height = 0;
+-  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.width;
++  framebuffer.current_dirty.x = framebuffer.back_target->mode_info.original_width;
+   framebuffer.current_dirty.width = 0;
+ 
+   mode_info->mode_type &= ~GRUB_VIDEO_MODE_TYPE_DOUBLE_BUFFERED;
+@@ -1739,6 +1775,9 @@ grub_video_fb_get_info_and_fini (struct grub_video_mode_info *mode_info,
+   grub_memcpy (mode_info, &(framebuffer.back_target->mode_info),
+ 	       sizeof (*mode_info));
+ 
++  mode_info->width = framebuffer.back_target->mode_info.original_width;
++  mode_info->height = framebuffer.back_target->mode_info.original_height;
++
+   /* We are about to load a kernel.  Switch back to page zero, since some
+      kernel drivers expect that.  */
+   if (framebuffer.set_page && framebuffer.displayed_page != 0)
+diff --git a/include/grub/fbutil.h b/include/grub/fbutil.h
+index 78a1ab3b4..ad625bff9 100644
+--- a/include/grub/fbutil.h
++++ b/include/grub/fbutil.h
+@@ -61,4 +61,13 @@ grub_video_color_t get_pixel (struct grub_video_fbblit_info *source,
+ void set_pixel (struct grub_video_fbblit_info *source,
+                 unsigned int x, unsigned int y, grub_video_color_t color);
+ 
++int 
++trans_x(int x,int y, struct grub_video_mode_info *mode_info);
++
++int 
++trans_y(int x, int y, struct grub_video_mode_info *mode_info);
++
++grub_video_rect_t grub_video_transform_rectangle (grub_video_rect_t r, 
++                                                  const struct grub_video_mode_info *mode_info);
++
+ #endif /* ! GRUB_VBEUTIL_MACHINE_HEADER */
+diff --git a/include/grub/video.h b/include/grub/video.h
+index 9dac0f379..f05e70b26 100644
+--- a/include/grub/video.h
++++ b/include/grub/video.h
+@@ -75,6 +75,14 @@ typedef enum grub_video_mode_type
+     GRUB_VIDEO_MODE_TYPE_INFO_MASK        = 0x00FF0000,
+   } grub_video_mode_type_t;
+ 
++enum grub_video_rotation
++  {
++    GRUB_VIDEO_ROTATE_NONE,
++    GRUB_VIDEO_ROTATE_90,
++    GRUB_VIDEO_ROTATE_180,
++    GRUB_VIDEO_ROTATE_270
++  };
++
+ /* The basic render target representing the whole display.  This always
+    renders to the back buffer when double-buffering is in use.  */
+ #define GRUB_VIDEO_RENDER_TARGET_DISPLAY \
+@@ -122,12 +130,20 @@ enum grub_video_blit_operators
+ 
+ struct grub_video_mode_info
+ {
+-  /* Width of the screen.  */
++  /* Width of the screen, before the rotation.  */
++  unsigned int original_width;
++
++  /* Height of the screen, before the rotation.  */
++  unsigned int original_height;
++
++  /* Width of the screen, after the rotation.  */
+   unsigned int width;
+ 
+-  /* Height of the screen.  */
++  /* Height of the screen, after the rotation.  */
+   unsigned int height;
+ 
++  enum grub_video_rotation rotation;
++
+   /* Mode type bitmask.  Contains information like is it Index color or
+      RGB mode.  */
+   grub_video_mode_type_t mode_type;
+-- 
+2.47.2
+
+
+From 8b450b5a45e939f58b91515c9512dc61f491d3ad Mon Sep 17 00:00:00 2001
+From: kbader94 <kyle.bader94@gmail.com>
+Date: Wed, 29 May 2024 22:00:21 -0600
+Subject: [PATCH 13/13] fb rotation - mkconfig Add config option to mkconfig to
+ enable setting GRUB_FB_ROTATION in grub's config file. Setting
+ GRUB_FB_ROTATION to 0,90,180 or 270 will set the rotation for both grub AND
+ linux
+
+Changes to be committed:
+	modified:   util/grub-mkconfig.in
+	modified:   util/grub.d/00_header.in
+	modified:   util/grub.d/10_linux.in
+---
+ util/grub-mkconfig.in    |  1 +
+ util/grub.d/00_header.in | 16 ++++++++++++++++
+ util/grub.d/10_linux.in  | 32 ++++++++++++++++++++++++++++++++
+ 3 files changed, 49 insertions(+)
+
+diff --git a/util/grub-mkconfig.in b/util/grub-mkconfig.in
+index 32c480dae..b915fcf00 100644
+--- a/util/grub-mkconfig.in
++++ b/util/grub-mkconfig.in
+@@ -247,6 +247,7 @@ export GRUB_DEFAULT \
+   GRUB_DISABLE_RECOVERY \
+   GRUB_VIDEO_BACKEND \
+   GRUB_GFXMODE \
++  GRUB_FB_ROTATION \
+   GRUB_BACKGROUND \
+   GRUB_THEME \
+   GRUB_GFXPAYLOAD_LINUX \
+diff --git a/util/grub.d/00_header.in b/util/grub.d/00_header.in
+index f86b69bad..990fce9ed 100644
+--- a/util/grub.d/00_header.in
++++ b/util/grub.d/00_header.in
+@@ -47,6 +47,22 @@ if [ -s \$prefix/grubenv ]; then
+   load_env
+ fi
+ EOF
++
++# Set fb rotation for grub
++if [ "x$GRUB_FB_ROTATION" != x ]; then
++    case "${GRUB_FB_ROTATION}" in
++        inverted | 180)
++    echo set rotation=180
++            ;;
++        left | 90)
++    echo set rotation=90
++            ;;
++        right | 270)
++    echo set rotation=270
++            ;;
++    esac
++fi
++
+ if [ "x$GRUB_BUTTON_CMOS_ADDRESS" != "x" ]; then
+     cat <<EOF
+ if cmostest $GRUB_BUTTON_CMOS_ADDRESS ; then
+diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
+index cc393be7e..671373837 100644
+--- a/util/grub.d/10_linux.in
++++ b/util/grub.d/10_linux.in
+@@ -120,10 +120,42 @@ linux_entry ()
+ 	  && grep -qx "CONFIG_VT_HW_CONSOLE_BINDING=y" "${config}" 2> /dev/null; then
+ 	  echo "	set gfxpayload=keep" | sed "s/^/$submenu_indentation/"
+       fi
++
++    # Set fb rotation by default
++    case "${GRUB_FB_ROTATION}" in
++    inverted | 180)
++      args="$args fbcon=rotate:2"
++      ;;
++    left | 90)
++      args="$args fbcon=rotate:3"
++      ;;
++    right | 270)
++      args="$args fbcon=rotate:1"
++      ;;
++    esac
++
+   else
+       if [ "x$GRUB_GFXPAYLOAD_LINUX" != xtext ]; then
+ 	  echo "	load_video" | sed "s/^/$submenu_indentation/"
+       fi
++
++    if [ "x$GRUB_GFXPAYLOAD_LINUX" = "xkeep" ]; then
++
++      # Set fb rotation if gfxpayload == keep
++      case "${GRUB_FB_ROTATION}" in
++      inverted | 180)
++        args="$args fbcon=rotate:2"
++        ;;
++      left | 90)
++        args="$args fbcon=rotate:3"
++        ;;
++      right | 270)
++        args="$args fbcon=rotate:1"
++        ;;
++      esac
++
++    fi
++
+       echo "	set gfxpayload=$GRUB_GFXPAYLOAD_LINUX" | sed "s/^/$submenu_indentation/"
+   fi
+ 
+-- 
+2.47.2
+
