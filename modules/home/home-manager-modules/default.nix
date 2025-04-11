@@ -1,6 +1,8 @@
 { config, pkgs, ... }:
 {
   imports = [
+    ./packages.nix
+    ./packages-unstable.nix
     ./azuredatastudio.nix
 #    ./bash.nix
 #    ./bashrc-personal.nix
@@ -11,7 +13,6 @@
     ./gtk.nix
 #    ./nvf.nix
 #    ./stylix.nix
-    ./vscode.nix
     ./zsh
   ];
 }

@@ -95,7 +95,7 @@
         # azuredatastudio
         mc
         rambox
-        _1password-gui
+        
         unixODBCDrivers.msodbcsql18
         obs-studio
         onlyoffice-desktopeditors
@@ -110,5 +110,6 @@
         # vivaldi
         # vivaldi-ffmpeg-codecs
         kdePackages.sddm-kcm
+        
     ];
 }
