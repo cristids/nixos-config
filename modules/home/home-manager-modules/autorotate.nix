@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 let
-  autorotateScript = pkgs.writeShellScript "autorotate" (builtins.readFile ./autorotate.sh);
+  autorotateScript = pkgs.writeShellScriptBin "autorotate" (builtins.readFile ./autorotate.sh);
 in {
   home.packages = [ autorotateScript ];
 
@@ -11,11 +11,16 @@ in {
       After = [ "graphical-session.target" ];
     };
 
-    Service = {
-      ExecStart = "${autorotateScript}";
+     Service = {
+      ExecStart = "${autorotateScript}/bin/autorotate";
       Restart = "on-failure";
+      # Environment = [
+      #   "DISPLAY=:0"
+      #   # "XDG_RUNTIME_DIR=/run/user/${toString config.home.user.uid}"
+      #   "WAYLAND_DISPLAY=wayland-0"
+      # ];
     };
-
+    
     Install = {
       WantedBy = [ "default.target" ];
     };

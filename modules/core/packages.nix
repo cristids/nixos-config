@@ -110,6 +110,7 @@
         # vivaldi
         # vivaldi-ffmpeg-codecs
         kdePackages.sddm-kcm
-        
+        kdePackages.kcmutils
+        kdePackages.plymouth-kcm
     ];
 }

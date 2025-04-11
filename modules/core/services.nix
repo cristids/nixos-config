@@ -1,7 +1,5 @@
 { pkgs, config, ... }:
 {
-    environment.systemPackages = [ autorotatePkg ];
-
     services = {
         libinput.enable = true; # Input Handling
         fstrim.enable = true; # SSD Optimizer

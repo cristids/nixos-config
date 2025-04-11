@@ -1,3 +1,19 @@
+# #!/usr/bin/env bash
+
+# monitor-sensor | while read -r line; do
+#   case "$line" in
+#     *normal*) ORIENTATION=normal ;;
+#     *bottom-up*) ORIENTATION=inverted ;;
+#     *left-up*) ORIENTATION=left ;;
+#     *right-up*) ORIENTATION=right ;;
+#     *) continue ;;
+#   esac
+
+#   qdbus6 org.kde.KWin /org/kde/KWin org.kde.KWin.setScreenOrientation "$ORIENTATION"
+# done
+
+
+
 #!/usr/bin/env bash
 GREP_STRING="orientation changed:"
 ORIENTATIONS=("normal" "left-up" "right-up" "bottom-up")
