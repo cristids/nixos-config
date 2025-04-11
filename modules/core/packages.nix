@@ -112,5 +112,7 @@
         kdePackages.sddm-kcm
         kdePackages.kcmutils
         kdePackages.plymouth-kcm
+        kdePackages.kdeplasma-addons
+        maliit-keyboard
     ];
 }
