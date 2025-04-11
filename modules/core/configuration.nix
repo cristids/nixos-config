@@ -41,6 +41,7 @@
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
   hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
 
   hardware.sensor.iio.enable = true;
 
