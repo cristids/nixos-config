@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 {
   imports = [
+    ./autorotate.nix
     ./packages.nix
     ./packages-unstable.nix
 #    ./bash.nix

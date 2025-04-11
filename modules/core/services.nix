@@ -1,7 +1,4 @@
 { pkgs, config, ... }:
-let
-    autorotatePkg = pkgs.writeShellScriptBin "autorotate" (builtins.readFile ./autorotate.sh);
-in
 {
     environment.systemPackages = [ autorotatePkg ];
 
@@ -43,9 +40,6 @@ in
         # You can disable this if you're only using the Wayland session.
 #         xserver.enable = true;
         
-        xserver.displayManager.setupCommands = ''
-              ${autorotatePkg}/bin/autorotate &
-        '';
 
 
         # Configure keymap in X11
