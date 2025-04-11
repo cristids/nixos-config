@@ -3,7 +3,6 @@
   imports = [
     ./packages.nix
     ./packages-unstable.nix
-    ./azuredatastudio.nix
 #    ./bash.nix
 #    ./bashrc-personal.nix
     ./bat.nix

@@ -1,5 +1,10 @@
 { pkgs, config, ... }:
+let
+    autorotatePkg = pkgs.writeShellScriptBin "autorotate" (builtins.readFile ./autorotate.sh);
+in
 {
+    environment.systemPackages = [ autorotatePkg ];
+
     services = {
         libinput.enable = true; # Input Handling
         fstrim.enable = true; # SSD Optimizer
@@ -37,6 +42,10 @@
         # Enable the X11 windowing system.
         # You can disable this if you're only using the Wayland session.
 #         xserver.enable = true;
+        
+        xserver.displayManager.setupCommands = ''
+              ${autorotatePkg}/bin/autorotate &
+        '';
 
 
         # Configure keymap in X11

@@ -1,10 +1,11 @@
 { config, pkgs, unstable, ... }:
 
 {
-  home.packages.unstable = [
+  home.packages = with unstable;[
     _1password-gui
     affine
     azuredatastudio
     vscode
+ 
   ];
 }
