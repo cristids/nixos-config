@@ -109,5 +109,6 @@
 #         xorg.xrandr
         # vivaldi
         # vivaldi-ffmpeg-codecs
+        kdePackages.sddm-kcm
     ];
 }
