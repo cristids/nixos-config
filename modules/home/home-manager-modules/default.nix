@@ -1,7 +1,6 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, vars, ... }:
 {
   imports = [
-    ./autorotate.nix
     ./packages.nix
     ./packages-unstable.nix
 #    ./bash.nix
@@ -14,5 +13,6 @@
 #    ./nvf.nix
 #    ./stylix.nix
     ./zsh
-  ];
+  ]
+  ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;
 }

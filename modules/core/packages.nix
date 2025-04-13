@@ -114,5 +114,6 @@
         kdePackages.plymouth-kcm
         kdePackages.kdeplasma-addons
         maliit-keyboard
+        libinput
     ];
 }
