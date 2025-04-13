@@ -31,7 +31,7 @@
 
 environment.etc."udev/hwdb.d/61-sensor-local.hwdb".text = ''
 sensor:modalias:acpi:MXC*
-  ACCEL_MOUNT_MATRIX=-1, 0, 0; 0, 1, 0; 0, 0, 1
+ ACCEL_MOUNT_MATRIX=-1,0,0;0,1,0;0,0,1
 '';
 
 

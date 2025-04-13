@@ -31,6 +31,11 @@
         displayManager.sddm.enable = true;
         desktopManager.plasma6.enable = true;
 
+        #xserver.displayManager.gdm.enable = true;
+        #xserver.desktopManager.gnome.enable = true;
+
+        gnome.gnome-keyring.enable = true;
+
         onedrive.enable = false;
         tailscale.enable = true;
         fprintd.enable = true;
