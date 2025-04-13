@@ -13,8 +13,8 @@
 # '';
 
 # services.udev.extraHwdb = ''
-#   sensor:modalias:acpi:MXC6655:MXC6655::dmi:*svnGPD:pnG1628-04:*
-#    ACCEL_MOUNT_MATRIX=-1,0,0;0,1,0;0,0,1
+# sensor:modalias:acpi:MXC6655:MXC6655::dmi:*svnGPD:pnG1628-04:*
+#  ACCEL_MOUNT_MATRIX=-1,0,0;0,1,0;0,0,1
 # '';
 # services.udev.extraHwdb = ''
 #   sensor:modalias:acpi:MXC6655:MXC6655::dmi:*
@@ -29,10 +29,19 @@
 #   ACTION=="add", KERNEL=="iio:device0", ENV{ID_INPUT_TABLET_MODE}="1"
 # '';
 
-  environment.etc."udev/hwdb.d/61-sensor-local.hwdb".text = ''
-    sensor:modalias:acpi:MXC6655:MXC6655::dmi:*
-     ACCEL_MOUNT_MATRIX=-1,0,0;0,1,0;0,0,1
-  '';
+environment.etc."udev/hwdb.d/61-sensor-local.hwdb".text = ''
+sensor:modalias:acpi:MXC*
+  ACCEL_MOUNT_MATRIX=-1, 0, 0; 0, 1, 0; 0, 0, 1
+'';
+
+
+# ACCEL_MOUNT_MATRIX=-1,0,0;0,1,0;0,0,1
+# If needed, you can rotate the default matrix like this:
+# Rotation	  Matrix
+# Normal	    -1,0,0;0,1,0;0,0,1
+# 90° CCW	    0,1,0;-1,0,0;0,0,1 ← probably what you want
+# 180°	      1,0,0;0,-1,0;0,0,1
+# 270° CCW	  0,-1,0;1,0,0;0,0,1
 
 
   boot = {
@@ -51,11 +60,14 @@
         efi.canTouchEfiVariables = true;
         efi.efiSysMountPoint = "/boot";
          # Inject memrw and patching code into all GRUB menu entries
-        grub.extraConfig = ''
-          insmod memrw
-          #write_byte 0x78047116 0x1f #cat /sys/class/dmi/id/chassis_type    should return 31 meaning 0x1f
-          write_byte 0x45da4116 0x1f
-        '';
+grub.extraConfig = ''
+insmod memrw
+write_byte 0x78047116 0x1f 
+#cat /sys/class/dmi/id/chassis_type    should return 31 meaning 0x1f
+#write_byte 0x45da4116 0x1f
+'';
+
+
         # grub.extraConfig = ''
 #           insmod ($root)/grub/x86_64-efi/memrw.mod
 #           write_byte 0x45da4116 0x1f

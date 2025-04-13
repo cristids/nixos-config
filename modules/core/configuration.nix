@@ -51,7 +51,7 @@
   users.users.cristian = {
     isNormalUser = true;
     description = "Cristian Stamateanu";
-    extraGroups = [ "networkmanager" "wheel" "scanner" "plugdev" "pipewire" "bluetooth" "audio" "video"];
+    extraGroups = [ "networkmanager" "wheel" "scanner" "plugdev" "pipewire" "bluetooth" "audio" "video" "tablet" "input"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       kdePackages.kate
