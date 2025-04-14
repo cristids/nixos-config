@@ -82,5 +82,22 @@ write_byte 0x78047116 0x1f
 
         # grub.extraModules = [ "memrw" ];
       };  
+
+
+    kernelPatches = [{
+      name = "force-gpd-pocket4-chassis-type";
+      patch = null;
+      extraStructuredConfig = {};
+      postPatch = ''
+        substituteInPlace drivers/firmware/dmi_scan.c \
+          --replace 'dmi_chassis_type = data[0x05];' \
+                    'if (dmi_match(DMI_SYS_VENDOR, "GPD") && dmi_match(DMI_PRODUCT_NAME, "G1628-04")) { \
+                      dmi_chassis_type = 0x1f; \
+                      pr_info("Overriding chassis_type to 0x1f (Convertible) for GPD G1628-04\\n"); \
+                    } else { \
+                      dmi_chassis_type = data[0x05]; \
+                    }'
+      '';
+    }];
   };
 }

@@ -34,7 +34,7 @@
 
         # gnome.gnome-keyring.enable = true;
 
-        onedrive.enable = false;
+        onedrive.enable = true;
         tailscale.enable = true;
         fprintd.enable = true;
 
