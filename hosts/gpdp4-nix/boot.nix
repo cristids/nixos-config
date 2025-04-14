@@ -34,6 +34,11 @@ sensor:modalias:acpi:MXC*
  ACCEL_MOUNT_MATRIX=-1,0,0;0,1,0;0,0,1
 '';
 
+#THEN RUN
+#sudo systemd-hwdb update
+#sudo udevadm trigger -v -p DEVNAME=/dev/iio:device0
+#sudo systemctl restart iio-sensor-proxy.service
+
 
 # ACCEL_MOUNT_MATRIX=-1,0,0;0,1,0;0,0,1
 # If needed, you can rotate the default matrix like this:

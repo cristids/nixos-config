@@ -20,15 +20,15 @@ ORIENTATIONS=("normal" "left-up" "right-up" "bottom-up")
 
 monitor-sensor | while read -r line; do
   case "$line" in
-    *normal*) ORIENTATION=right ;;
-    *bottom-up*) ORIENTATION=left ;;
-    *left-up*) ORIENTATION=normal ;;
-    *right-up*) ORIENTATION=inverted ;;
+    # *normal*) ORIENTATION=right ;;
+    # *bottom-up*) ORIENTATION=left ;;
+    # *left-up*) ORIENTATION=normal ;;
+    # *right-up*) ORIENTATION=inverted ;;
     
-    # *normal*) ORIENTATION=normal ;;
-    # *bottom-up*) ORIENTATION=inverted ;;
-    # *left-up*) ORIENTATION=left ;;
-    # *right-up*) ORIENTATION=right ;;
+    *normal*) ORIENTATION=normal ;;
+    *bottom-up*) ORIENTATION=inverted ;;
+    *left-up*) ORIENTATION=left ;;
+    *right-up*) ORIENTATION=right ;;
     *) continue ;;
   esac
 
