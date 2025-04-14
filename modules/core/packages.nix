@@ -104,17 +104,5 @@
         tlrc
         hplip
         hplipWithPlugin
-#        mplayer
-#        vlc
-#         xorg.xrandr
-        # vivaldi
-        # vivaldi-ffmpeg-codecs
-        kdePackages.sddm-kcm
-        kdePackages.kcmutils
-        kdePackages.plymouth-kcm
-        kdePackages.kdeplasma-addons
-        maliit-keyboard
-        libinput
-
     ];
 }

@@ -30,7 +30,9 @@
 
     mkHost = name: hostModules: nixpkgs.lib.nixosSystem {
       inherit system;
-      
+      specialArgs = {
+        inherit inputs unstablePkgs;
+      };
       modules = sharedModules ++ hostModules ++ [{
         networking.hostName = name;
         # nixpkgs.overlays = overlays;

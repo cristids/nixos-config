@@ -9,6 +9,7 @@
     ./networking.nix
     ./services.nix
     ./packages.nix
+    ./kde.nix
     #./hyprland.nix
   ];
 
@@ -55,7 +56,6 @@
     extraGroups = [ "networkmanager" "wheel" "scanner" "plugdev" "pipewire" "bluetooth" "audio" "video" "tablet" "input"];
     shell = pkgs.zsh;
     packages = with pkgs; [
-      kdePackages.kate
     #  thunderbird
     ];
   };

@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, unstablePkgs, ... }:
 {
     services = {
         acpid.enable = true;
@@ -27,14 +27,12 @@
             #media-session.enable = true;
         };
 
-        # Enable the KDE Plasma Desktop Environment.
-        displayManager.sddm.enable = true;
-        desktopManager.plasma6.enable = true;
+ 
 
         #xserver.displayManager.gdm.enable = true;
         #xserver.desktopManager.gnome.enable = true;
 
-        gnome.gnome-keyring.enable = true;
+        # gnome.gnome-keyring.enable = true;
 
         onedrive.enable = false;
         tailscale.enable = true;
