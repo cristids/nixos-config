@@ -1,9 +1,10 @@
-{ pkgs, config, ... }:
+{ pkgs, config, unstablePkgs, ... }:
 
 {
   boot = {
     # Kernel
-    kernelPackages = pkgs.linuxPackages_latest;
+    #kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = unstablePkgs.linuxPackages_zen;
     #kernelPackages = pkgs.linuxPackages_zen;
     kernelModules = [ "v4l2loopback" ];
     extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
