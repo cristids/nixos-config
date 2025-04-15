@@ -14,6 +14,7 @@
     #./hyprland.nix
   ];
 
+  nix.settings.download-buffer-size = 67108864reboot;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 #   nixpkgs.config.allowUnfree = true;
 
@@ -42,7 +43,7 @@
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   hardware.bluetooth.settings = {

@@ -8,6 +8,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    stable.url = "github:NixOS/nixpkgs/nixos-24.11";
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: let
@@ -18,6 +19,10 @@
       config.allowUnfree = true;
     };
 
+    stablePkgs = import inputs.stable {
+      inherit system;
+      config.allowUnfree = true;
+    };
 
     sharedModules = [
       ./modules/core/configuration.nix
@@ -31,7 +36,7 @@
     mkHost = name: hostModules: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs unstablePkgs;
+        inherit inputs unstablePkgs stablePkgs;
       };
       modules = sharedModules ++ hostModules ++ [{
         networking.hostName = name;
