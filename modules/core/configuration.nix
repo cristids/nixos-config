@@ -14,7 +14,7 @@
     #./hyprland.nix
   ];
 
-  nix.settings.download-buffer-size = 67108864reboot;
+  nix.settings.download-buffer-size = 67108864;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 #   nixpkgs.config.allowUnfree = true;
 
