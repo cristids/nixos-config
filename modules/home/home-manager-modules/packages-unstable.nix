@@ -1,7 +1,7 @@
 { config, pkgs, unstable, ... }:
 let
   customAzureDataStudio = unstable.callPackage ../../../pkgs/azuredatastudio/package.nix {};
-in {
+in
 {
   home.packages = with unstable;[
     _1password-gui
