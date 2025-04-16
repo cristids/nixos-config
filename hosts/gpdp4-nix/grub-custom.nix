@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ config, pkgs, lib, ... }:
 
 pkgs.grub2.overrideAttrs (old: {
   pname = "grub2-fbrot";

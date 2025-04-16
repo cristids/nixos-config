@@ -1,9 +1,15 @@
+{ inputs, lib, config, pkgs, ... }:
 {
+  nixpkgs.overlays = [
+    (import ./grub-overlay.nix)
+  ];
+
   imports = [ 
       ./hardware-configuration.nix 
       ./boot.nix
       ./fprintd.nix
       ../../modules/drivers/amd.nix
+      #./grub-custom.nix
   ];
 
   # This indicates the version of the system at the time of the first install.

@@ -1,4 +1,11 @@
 { pkgs, config, ... }:
+let
+  grub2-fbrot = pkgs.grub2.overrideAttrs (old: {
+    pname = "grub2-fbrot";
+    version = old.version + "-fbrot";
+    patches = (old.patches or []) ++ [ ./fb_rot.patch ];
+  });
+in
 {
   services.udev.enable = true;
 
@@ -54,7 +61,7 @@ sensor:modalias:acpi:MXC*
       kernelParams = ["quiet" "splash" "fbcon=rotate:1" "fbcon=rotate_all:1" "video=eDP-1:panel_orientation=right_side_up" "video=efifb:rotate=1" "video=efifb:panel_orientation=right_side_up"];
 
       loader = {
-        # grub.package = import ./grub-custom.nix;
+        #grub.package = grub2-fbrot;
         systemd-boot.enable = false;
         grub.enable = true;
         grub.device = "nodev";
