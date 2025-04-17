@@ -9,6 +9,7 @@
     ./networking.nix
     ./services.nix
     ./packages.nix
+    ./zsh.nix
     ./kde.nix
     #./kde-unstable.nix
     #./hyprland.nix

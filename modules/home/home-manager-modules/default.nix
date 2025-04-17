@@ -12,7 +12,7 @@
     ./gtk.nix
 #    ./nvf.nix
 #    ./stylix.nix
-    ./zsh
+    # ./zsh
   ]
   ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;
 }
