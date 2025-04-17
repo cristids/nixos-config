@@ -96,7 +96,6 @@
         mc
         rambox
         
-        unixODBCDrivers.msodbcsql18
         obs-studio
         onlyoffice-desktopeditors
         libreoffice-qt-fresh
