@@ -23,37 +23,15 @@
             ];
         };
 
+        zsh.enable = true;
+
 #         git = {
 #             enable = true;
 #             package = pkgs.gitFull;
 #             config.credential.helper = "libsecret";
 #         };
 
-    #      zsh = {
-    #         enable = true;
-    #         ohMyZsh = {
-    #             enable = true;
-    #             theme = "agnoster";
-    #             customPkgs = with pkgs; [
-    #                 nix-zsh-completions
-    #                 zsh-history
-    #                 zsh-fzf-tab
-    #                 zsh-completions
-    #             ];
-    #             plugins = [
-    #                 "git"
-    #                 "history"
-    # #                 "nix-zsh-completions"
-    #                 "web-search"
-    # #                 "zsh-autosuggestions"
-    # #                 "zsh-syntax-highlighting"
-    # #                 "fast-syntax-highlighting"
-    #                 "copyfile"
-    #                 "copybuffer"
-    #                 "dirhistory"
-    #             ];
-    #         };
-    #      };
+ 
 
         # Some programs need SUID wrappers, can be configured further or are
         # started in user sessions.
