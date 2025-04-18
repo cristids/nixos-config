@@ -9,9 +9,10 @@
 
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     stable.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nvf.url = "github:notashelf/nvf";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: let
+  outputs = { self, nixpkgs, home-manager, nvf,  ... }@inputs: let
     system = "x86_64-linux";
 
     unstablePkgs = import inputs.unstable {
@@ -26,7 +27,8 @@
 
     sharedModules = [
       ./modules/core/configuration.nix
-       home-manager.nixosModules.home-manager
+      home-manager.nixosModules.home-manager
+      # nvf.nixosModules.default
     ];
 
     # overlays = [
@@ -36,7 +38,7 @@
     mkHost = name: hostModules: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = {
-        inherit inputs unstablePkgs stablePkgs;
+        inherit inputs unstablePkgs stablePkgs nvf;
       };
       modules = sharedModules ++ hostModules ++ [{
         networking.hostName = name;
@@ -50,6 +52,7 @@
         home-manager.extraSpecialArgs = { 
           unstable = unstablePkgs;
           vars.hostName = name;
+          nvf = inputs.nvf;
         };       
       }];
     };

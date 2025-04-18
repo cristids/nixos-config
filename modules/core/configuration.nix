@@ -10,6 +10,7 @@
     ./services.nix
     ./packages.nix
     ./kde.nix
+    ./fonts.nix
     #./kde-unstable.nix
     #./hyprland.nix
   ];
