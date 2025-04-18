@@ -13,9 +13,33 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
-    oh-my-zsh = {
-      enable = true;
-    };
+    plugins = [
+      {
+        name = "fzf-tab";
+        src = pkgs.zsh-fzf-tab;
+      }
+      {
+        name = "nix-zsh-completions";
+        src = pkgs.nix-zsh-completions;
+      }
+      {
+        name = "zsh-completions";
+        src = pkgs.zsh-completions;
+      }
+      {
+        name = "zsh-completions";
+        src = pkgs.zsh-completions;
+      }
+      {
+        name = "zsh-history";
+        src = pkgs.zsh-history;
+      }
+    ];
+
+
+    # oh-my-zsh = {
+    #   enable = true;
+    # };
 
 #     plugins = [
 #       {

@@ -10,8 +10,9 @@
     ./gh.nix
     ./git.nix
     ./gtk.nix
-    ./nvf.nix
-    # ./stylix.nix
+#    ./nvf.nix
+#    ./stylix.nix
+    ./ohmyposh.nix
     ./zsh
   ]
   ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;

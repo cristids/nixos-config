@@ -9,6 +9,7 @@
     ./networking.nix
     ./services.nix
     ./packages.nix
+    ./zsh.nix
     ./kde.nix
     ./fonts.nix
     #./kde-unstable.nix
