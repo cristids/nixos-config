@@ -10,8 +10,8 @@
     ./gh.nix
     ./git.nix
     ./gtk.nix
-#    ./nvf.nix
-#    ./stylix.nix
+   ./nvf.nix
+  #  ./stylix.nix
     ./ohmyposh.nix
     ./zsh
   ]
