@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, nvf, ... }:
 
 # let
 #   nvf = import (builtins.fetchGit {
@@ -8,13 +8,13 @@
 # in
 # {
 
-let
-  # Ensure Nixpkgs is set to the stable channel
-  nixpkgs = import <nixpkgs> { };
+# let
+#   # Ensure Nixpkgs is set to the stable channel
+#   nixpkgs = import <nixpkgs> { };
 
-  # Import the nvf module from Nixpkgs if available
-  nvf = nixpkgs.nvf ;
-in
+#   # Import the nvf module from Nixpkgs if available
+#   nvf = nixpkgs.nvf ;
+# in
 {
   imports = [
     nvf.homeManagerModules.default
@@ -106,7 +106,7 @@ in
         trouble.enable = true;
         lspSignature.enable = true;
         otter-nvim.enable = false;
-        lsplines.enable = false;
+        # lsplines.enable = false;
         nvim-docs-view.enable = false;
       };
 
@@ -171,7 +171,7 @@ in
 
       notify = {
         nvim-notify.enable = true;
-        nvim-notify.setupOpts.background_colour = "#${config.lib.stylix.colors.base01}";
+        # nvim-notify.setupOpts.background_colour = "#${config.lib.stylix.colors.base01}";
       };
 
       utility = {
@@ -217,6 +217,17 @@ in
   };
 }
 
-
-
-
+# {
+#   programs.nvf = {
+#     enable = true;
+#     # your settings need to go into the settings attribute set
+#     # most settings are documented in the appendix
+#     settings = {
+#       vim.viAlias = false;
+#       vim.vimAlias = true;
+#       vim.lsp = {
+#         enable = true;
+#       };
+#     };
+#   };
+# }

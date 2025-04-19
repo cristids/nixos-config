@@ -11,6 +11,7 @@
     ./packages.nix
     ./zsh.nix
     ./kde.nix
+    ./fonts.nix
     #./kde-unstable.nix
     #./hyprland.nix
   ];
