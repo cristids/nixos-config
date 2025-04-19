@@ -13,6 +13,7 @@
    ./nvf.nix
   #  ./stylix.nix
     ./ohmyposh.nix
+    ./vscode.nix
     ./zsh
   ]
   ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;
