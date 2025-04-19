@@ -17,6 +17,7 @@
       bierner.markdown-emoji
       bierner.emojisense
       jnoortheen.nix-ide
+      oops418.nix-env-picker
     ]) ++ (with unstable.vscode-extensions; [
       # Unstable
       seatonjiang.gitmoji-vscode
