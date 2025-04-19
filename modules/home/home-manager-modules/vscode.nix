@@ -44,6 +44,7 @@
       # "git-graph.repository.sign.commits" = true;
       # "git-graph.repository.sign.tags" = true;
       # "git-graph.repository.commits.showSignatureStatus" = true;
+        "git.enableSmartCommit" = true:
       # Styling
       # "window.autoDetectColorScheme" = true;
       # "workbench.preferredDarkColorTheme" = "Default Dark Modern";
