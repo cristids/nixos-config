@@ -22,7 +22,12 @@
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
-  home.packages = [
+  home.packages = with pkgs; [
+    # (nerdfonts.override { fonts = [ "FiraCode" "Meslo" ]; })
+    # fonts.packages = [ ... ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts)
+    nerd-fonts.fira-code
+    # nerd-fonts.meslo-lgs-nf
+
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # pkgs.hello
@@ -84,5 +89,5 @@
 #     enableBashIntegration = true;
     enableZshIntegration = true;
   };
-
+   
 }
