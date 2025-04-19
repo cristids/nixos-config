@@ -8,7 +8,7 @@ in
     affine
     #azuredatastudio
     customAzureDataStudio
-    # vscode
+    vscode
  
   ];
 }
