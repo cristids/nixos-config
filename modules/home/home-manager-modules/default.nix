@@ -10,7 +10,8 @@
     ./gh.nix
     ./git.nix
     ./gtk.nix
-   ./nvf.nix
+    ./neovim.nix
+  #  ./nvf.nix
   #  ./stylix.nix
     ./ohmyposh.nix
     ./vscode.nix

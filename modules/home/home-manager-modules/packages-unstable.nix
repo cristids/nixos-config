@@ -9,6 +9,6 @@ in
     #azuredatastudio
     customAzureDataStudio
     vscode
- 
+
   ];
 }
