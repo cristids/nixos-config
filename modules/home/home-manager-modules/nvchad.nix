@@ -1,5 +1,9 @@
-{...}:
+{ config, pkgs, nvchadModule, ... }: 
 {
+  imports = [
+    nvchadModule
+  ];
+  
   programs.nvchad = {
     enable = true;
     extraPackages = with pkgs; [

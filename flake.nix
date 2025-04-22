@@ -9,7 +9,7 @@
 
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     stable.url = "github:NixOS/nixpkgs/nixos-24.11";
-    # nvf.url = "github:notashelf/nvf";
+
     nvchad4nix = {
       url = "github:nix-community/nix4nvchad";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -32,20 +32,18 @@
     sharedModules = [
       ./modules/core/configuration.nix
       home-manager.nixosModules.home-manager
-      # nvf.nixosModules.default
-      {  # <- # example to add the overlay to Nixpkgs:
-        nixpkgs = {
-          overlays = [
-            (final: prev: {
-                nvchad = inputs.nvchad4nix.packages."${system}".nvchad;
-            })
-          ];
-        };
-      }
+      # {  # <- # example to add the overlay to Nixpkgs:
+      #   nixpkgs = {
+      #     overlays = [
+      #       (final: prev: {
+      #         nvchad = inputs.nvchad4nix.packages."${system}".default;
+      #         # nvchad = inputs.nvchad4nix.packages."${system}".nvchad;
+      #         # nvchad = inputs.nvchad4nix.homeManagerModule;
+      #       })
+      #     ];
+      #   };
+      # }
     ];
-    # overlays = [
-    #   (import ./overlays/custom.nix)
-    # ];
 
     mkHost = name: hostModules: nixpkgs.lib.nixosSystem {
       inherit system;
@@ -54,7 +52,6 @@
       };
       modules = sharedModules ++ hostModules ++ [{
         networking.hostName = name;
-        # nixpkgs.overlays = overlays;
 
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
@@ -64,7 +61,7 @@
         home-manager.extraSpecialArgs = { 
           unstable = unstablePkgs;
           vars.hostName = name;
-          # nvf = inputs.nvf;
+          nvchadModule = inputs.nvchad4nix.homeManagerModule;
         };       
       }];
     };
