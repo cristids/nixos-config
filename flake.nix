@@ -10,10 +10,10 @@
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     # nvf.url = "github:notashelf/nvf";
-    # nvchad4nix = {
-    #   url = "github:nix-community/nix4nvchad";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    nvchad4nix = {
+      url = "github:nix-community/nix4nvchad";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager,  ... }@inputs: let
@@ -33,15 +33,15 @@
       ./modules/core/configuration.nix
       home-manager.nixosModules.home-manager
       # nvf.nixosModules.default
-      # {  # <- # example to add the overlay to Nixpkgs:
-      #       nixpkgs = {
-      #         overlays = [
-      #           (final: prev: {
-      #               nvchad = inputs.nvchad4nix.packages."${system}".nvchad;
-      #           })
-      #         ];
-      #       };
-      #     }
+      {  # <- # example to add the overlay to Nixpkgs:
+        nixpkgs = {
+          overlays = [
+            (final: prev: {
+                nvchad = inputs.nvchad4nix.packages."${system}".nvchad;
+            })
+          ];
+        };
+      }
     ];
     # overlays = [
     #   (import ./overlays/custom.nix)
