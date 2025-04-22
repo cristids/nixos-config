@@ -73,6 +73,11 @@
         # azuredatastudio
         mc
         rambox
+        gcc
+        gnumake
+        ripgrep
+        nodejs_23
+        python3
         
         obs-studio
         onlyoffice-desktopeditors
