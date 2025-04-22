@@ -10,10 +10,21 @@
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     stable.url = "github:NixOS/nixpkgs/nixos-24.11";
 
-    nvchad4nix = {
-      url = "github:nix-community/nix4nvchad";
+     nvf = {
+      url = "github:notashelf/nvf";
+      # You can override the input nixpkgs to follow your system's
+      # instance of nixpkgs. This is safe to do as nvf does not depend
+      # on a binary cache.
       inputs.nixpkgs.follows = "nixpkgs";
+      # Optionally, you can also override individual plugins
+      # for example:
+      # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
     };
+
+    # nvchad4nix = {
+    #   url = "github:nix-community/nix4nvchad";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs = { self, nixpkgs, home-manager,  ... }@inputs: let
@@ -32,17 +43,6 @@
     sharedModules = [
       ./modules/core/configuration.nix
       home-manager.nixosModules.home-manager
-      # {  # <- # example to add the overlay to Nixpkgs:
-      #   nixpkgs = {
-      #     overlays = [
-      #       (final: prev: {
-      #         nvchad = inputs.nvchad4nix.packages."${system}".default;
-      #         # nvchad = inputs.nvchad4nix.packages."${system}".nvchad;
-      #         # nvchad = inputs.nvchad4nix.homeManagerModule;
-      #       })
-      #     ];
-      #   };
-      # }
     ];
 
     mkHost = name: hostModules: nixpkgs.lib.nixosSystem {
@@ -61,7 +61,8 @@
         home-manager.extraSpecialArgs = { 
           unstable = unstablePkgs;
           vars.hostName = name;
-          nvchadModule = inputs.nvchad4nix.homeManagerModule;
+          # nvchadModule = inputs.nvchad4nix.homeManagerModule;
+          nvf = inputs.nvf;
         };       
       }];
     };
