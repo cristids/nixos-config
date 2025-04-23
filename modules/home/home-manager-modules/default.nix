@@ -10,11 +10,11 @@
     ./gh.nix
     ./git.nix
     ./gtk.nix
-    ./nixcats-nvim.nix
+    # ./nixcats-nvim.nix
     # ./nixvim.nix
     #./nvchad.nix
     # ./neovim.nix
-    #./nvf.nix
+    ./nvf.nix
   #  ./stylix.nix
     ./ohmyposh.nix
     ./vscode.nix
