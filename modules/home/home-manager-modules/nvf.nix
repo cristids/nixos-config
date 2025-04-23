@@ -1,20 +1,4 @@
 { config, pkgs, nvf, ... }:
-
-# let
-#   nvf = import (builtins.fetchGit {
-#     url = "https://github.com/notashelf/nvf";
-#     ref = "master";  # or the specific branch or commit you want to use
-#   }) { inherit pkgs; };
-# in
-# {
-
-# let
-#   # Ensure Nixpkgs is set to the stable channel
-#   nixpkgs = import <nixpkgs> { };
-
-#   # Import the nvf module from Nixpkgs if available
-#   nvf = nixpkgs.nvf ;
-# in
 {
   imports = [
     nvf.homeManagerModules.default
@@ -23,19 +7,39 @@
   programs.nvf = {
     enable = true;
 
+    
+
     settings.vim = {
       vimAlias = true;
       viAlias = true;
       withNodeJs = true;
       useSystemClipboard = true;
 
+      theme = {
+        enable = true;
+        name = "catppuccin";
+        style = "mocha";
+        transparent = false;
+      };
+
       options = {
         tabstop = 2;
         shiftwidth = 2;
         wrap = false;
       };
+# vim.api.nvim_set_keymap('n', '<F5>', ':lua require"dap".continue()<CR>', { noremap = true, silent = true })  -- Start/Continue
+# vim.api.nvim_set_keymap('n', '<F10>', ':lua require"dap".step_over()<CR>', { noremap = true, silent = true }) -- Step Over
+# vim.api.nvim_set_keymap('n', '<F11>', ':lua require"dap".step_into()<CR>', { noremap = true, silent = true }) -- Step Into
+# vim.api.nvim_set_keymap('n', '<F12>', ':lua require"dap".step_out()<CR>', { noremap = true, silent = true }) -- Step Out
+# vim.api.nvim_set_keymap('n', '<leader>b', ':lua require"dap".toggle_breakpoint()<CR>', { noremap = true, silent = true }) -- Toggle Breakpoint
 
       keymaps = [
+        {
+          key = "<F5>";
+          mode = ["n"];
+          action = ":lua require\"dap\".continue()<CR>";
+          desc = "Start / Continue Debug";
+        }
         {
           key = "jk";
           mode = ["i"];
@@ -98,6 +102,13 @@
         enable = true;
       };
 
+      # debugger = {
+      #   nvim-dap = {
+      #     enable = true;
+      #     ui.enable = true;
+      #   };
+      # };
+
       lsp = {
         formatOnSave = true;
         lspkind.enable = false;
@@ -119,7 +130,16 @@
         nix.enable = true;
         clang.enable = true;
         zig.enable = true;
-        python.enable = true;
+        python = {
+          enable = true;
+          dap.enable = true;
+          dap.debugger = "debugpy";
+          format.enable = true;
+          lsp.enable = true;
+          lsp.server = "pyright";
+          treesitter.enable = true;
+        };
+
         markdown.enable = true;
         ts.enable = true;
         html.enable = true;
@@ -138,7 +158,7 @@
       statusline = {
         lualine = {
           enable = true;
-          theme = "base16";
+          theme = "catppuccin";
         };
       };
 
@@ -205,6 +225,14 @@
         };
         fastaction.enable = true;
       };
+      assistant = {
+        chatgpt.enable = false;
+        copilot = {
+          enable = true;
+          cmp.enable = true;
+        };
+        codecompanion-nvim.enable = false;
+      };
 
       session = {
         nvim-session-manager.enable = false;
@@ -218,12 +246,16 @@
 }
 
 # {
+#   imports = [
+#     nvf.homeManagerModules.default
+#   ];  
+
 #   programs.nvf = {
 #     enable = true;
 #     # your settings need to go into the settings attribute set
 #     # most settings are documented in the appendix
 #     settings = {
-#       vim.viAlias = false;
+#       vim.viAlias = true;
 #       vim.vimAlias = true;
 #       vim.lsp = {
 #         enable = true;

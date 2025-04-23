@@ -10,21 +10,29 @@
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     stable.url = "github:NixOS/nixpkgs/nixos-24.11";
 
-     nvf = {
-      url = "github:notashelf/nvf";
-      # You can override the input nixpkgs to follow your system's
-      # instance of nixpkgs. This is safe to do as nvf does not depend
-      # on a binary cache.
-      inputs.nixpkgs.follows = "nixpkgs";
-      # Optionally, you can also override individual plugins
-      # for example:
-      # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
-    };
+    # nvf = {
+    #   url = "github:notashelf/nvf";
+    #   # You can override the input nixpkgs to follow your system's
+    #   # instance of nixpkgs. This is safe to do as nvf does not depend
+    #   # on a binary cache.
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    #   # Optionally, you can also override individual plugins
+    #   # for example:
+    #   # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
+    # };
 
     # nvchad4nix = {
     #   url = "github:nix-community/nix4nvchad";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
+
+    inputs.nixvim = {
+      url = "github:nix-community/nixvim";
+      # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
+      # url = "github:nix-community/nixvim/nixos-24.11";
+
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager,  ... }@inputs: let
@@ -62,7 +70,7 @@
           unstable = unstablePkgs;
           vars.hostName = name;
           # nvchadModule = inputs.nvchad4nix.homeManagerModule;
-          nvf = inputs.nvf;
+          # nvf = inputs.nvf;
         };       
       }];
     };
