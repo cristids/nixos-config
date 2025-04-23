@@ -10,7 +10,8 @@
     ./gh.nix
     ./git.nix
     ./gtk.nix
-    ./nixvim.nix
+    ./nixcats-nvim.nix
+    # ./nixvim.nix
     #./nvchad.nix
     # ./neovim.nix
     #./nvf.nix
