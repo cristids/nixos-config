@@ -114,11 +114,19 @@
         nvim-docs-view.enable = false;
       };
 
+      debugger = {
+        nvim-dap = {
+          enable = true;
+          ui.enable = true;
+        };
+      };
+
       languages = {
         enableLSP = true;
         enableFormat = true;
         enableTreesitter = true;
         enableExtraDiagnostics = true;
+        enableDAP = true;
 
         nix.enable = true;
         clang.enable = true;
@@ -129,7 +137,7 @@
           dap.debugger = "debugpy";
           format.enable = true;
           lsp.enable = true;
-          lsp.server = "pyright";
+          lsp.server = "python-lsp-server";
           treesitter.enable = true;
         };
 
