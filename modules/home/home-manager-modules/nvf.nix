@@ -1,11 +1,11 @@
 {
   config,
   pkgs,
-  nvf,
+  nvfModule,
   ...
 }: {
   imports = [
-    nvf.homeManagerModules.default
+    nvfModule.homeManagerModules.default
   ];
 
   programs.nvf = {
@@ -184,6 +184,13 @@
         enable = true;
         gitsigns.enable = true;
         gitsigns.codeActions.enable = false; # throws an annoying debug message
+      };
+      
+      terminal = {
+        toggleterm = {
+          enable = true;
+          lazygit.enable = true;
+        };
       };
 
       projects.project-nvim.enable = true;

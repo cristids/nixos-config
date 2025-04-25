@@ -11,15 +11,15 @@
     stable.url = "github:NixOS/nixpkgs/nixos-24.11";
 
     nvf = {
-      url = "github:notashelf/nvf";
-      # url = "github:howird/nvf";
-      # You can override the input nixpkgs to follow your system's
-      # instance of nixpkgs. This is safe to do as nvf does not depend
-      # on a binary cache.
-      inputs.nixpkgs.follows = "nixpkgs";
-      # Optionally, you can also override individual plugins
-      # for example:
-      # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
+     url = "github:notashelf/nvf";
+     # url = "github:howird/nvf";
+     # You can override the input nixpkgs to follow your system's
+     # instance of nixpkgs. This is safe to do as nvf does not depend
+     # on a binary cache.
+     inputs.nixpkgs.follows = "nixpkgs";
+     # Optionally, you can also override individual plugins
+     # for example:
+     # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
     };
 
     # nvchad4nix = {
@@ -34,9 +34,19 @@
 
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
+
+    # nixCats = {
+    #   url = "github:BirdeeHub/nixCats-nvim";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
-  outputs = { self, nixpkgs, home-manager,  ... }@inputs: let
+  outputs = {
+    self,
+    nixpkgs,
+    home-manager,
+    ...
+  } @ inputs: let
     system = "x86_64-linux";
 
     unstablePkgs = import inputs.unstable {
@@ -54,32 +64,39 @@
       home-manager.nixosModules.home-manager
     ];
 
-    mkHost = name: hostModules: nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = {
-        inherit inputs unstablePkgs stablePkgs;
-      };
-      modules = sharedModules ++ hostModules ++ [{
-        networking.hostName = name;
+    mkHost = name: hostModules:
+      nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs unstablePkgs stablePkgs;
+        };
+        modules =
+          sharedModules
+          ++ hostModules
+          ++ [
+            {
+              networking.hostName = name;
 
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
-        home-manager.backupFileExtension = "hm-bkp";
-        home-manager.users.cristian = import ./modules/home/home.nix;
-        # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix 
-        home-manager.extraSpecialArgs = { 
-          unstable = unstablePkgs;
-          vars.hostName = name;
-          # nvchadModule = inputs.nvchad4nix.homeManagerModule;
-          nvf = inputs.nvf;
-          # nixvim = inputs.nixvim;
-        };       
-      }];
-    };
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "hm-bkp";
+              home-manager.users.cristian = import ./modules/home/home.nix;
+              # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
+              home-manager.extraSpecialArgs = {
+                unstable = unstablePkgs;
+                vars.hostName = name;
+                # nvchadModule = inputs.nvchad4nix.homeManagerModule;
+                nvfModule = inputs.nvf;
+                # nixvim = inputs.nixvim;
+                # nixCats = inputs.nixCats;
+              };
+            }
+          ];
+      };
   in {
     nixosConfigurations = {
-      dell-nix = mkHost "dell-nix" [ ./hosts/dell-nix];
-      gpdp4-nix = mkHost "gpdp4-nix" [ ./hosts/gpdp4-nix];
+      dell-nix = mkHost "dell-nix" [./hosts/dell-nix];
+      gpdp4-nix = mkHost "gpdp4-nix" [./hosts/gpdp4-nix];
     };
   };
 }
