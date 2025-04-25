@@ -29,19 +29,8 @@
         shiftwidth = 2;
         wrap = false;
       };
-      # vim.api.nvim_set_keymap('n', '<F5>', ':lua require"dap".continue()<CR>', { noremap = true, silent = true })  -- Start/Continue
-      # vim.api.nvim_set_keymap('n', '<F10>', ':lua require"dap".step_over()<CR>', { noremap = true, silent = true }) -- Step Over
-      # vim.api.nvim_set_keymap('n', '<F11>', ':lua require"dap".step_into()<CR>', { noremap = true, silent = true }) -- Step Into
-      # vim.api.nvim_set_keymap('n', '<F12>', ':lua require"dap".step_out()<CR>', { noremap = true, silent = true }) -- Step Out
-      # vim.api.nvim_set_keymap('n', '<leader>b', ':lua require"dap".toggle_breakpoint()<CR>', { noremap = true, silent = true }) -- Toggle Breakpoint
 
       keymaps = [
-        {
-          key = "<F5>";
-          mode = ["n"];
-          action = ":lua require\"dap\".continue()<CR>";
-          desc = "Start / Continue Debug";
-        }
         {
           key = "jk";
           mode = ["i"];
@@ -185,7 +174,7 @@
         gitsigns.enable = true;
         gitsigns.codeActions.enable = false; # throws an annoying debug message
       };
-      
+
       terminal = {
         toggleterm = {
           enable = true;
@@ -234,13 +223,14 @@
         };
         fastaction.enable = true;
       };
+
       assistant = {
         chatgpt.enable = false;
         copilot = {
           enable = true;
           cmp.enable = true;
         };
-        codecompanion-nvim.enable = false;
+        codecompanion-nvim.enable = true;
       };
 
       session = {
