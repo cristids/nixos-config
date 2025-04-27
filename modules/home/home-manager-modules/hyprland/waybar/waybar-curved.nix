@@ -68,7 +68,7 @@ in
             "tooltip-format" = "{title}";
             "on-click" = "activate";
             "on-click-middle" = "close";
-            "ignore-list" = ["Alacritty" "kitty"];
+            "ignore-list" = ["Alacritty" "kitty" "kitten" "xwaylandvideobridge"];
             "app_ids-mapping" = {
               "firefoxdeveloperedition" = "firefox-developer-edition";
             };

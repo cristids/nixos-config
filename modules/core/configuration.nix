@@ -20,6 +20,11 @@
 
   nix.settings.download-buffer-size = 67108864;
   nix.settings.experimental-features = ["nix-command" "flakes"];
+
+  #automatically remove generations older than 14d
+  nix.gc.automatic = true;
+  nix.gc.options = "--delete-older-than 14d"
+
   #   nixpkgs.config.allowUnfree = true;
 
   # Set your time zone.

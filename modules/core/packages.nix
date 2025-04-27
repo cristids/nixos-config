@@ -77,6 +77,7 @@
     ripgrep
     # nodejs_23
     # python3
+    transmission_4-qt
 
     obs-studio
     onlyoffice-desktopeditors

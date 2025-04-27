@@ -6,6 +6,7 @@
   stylixImage = ../../../../home/wallpapers/AnimeGirlNightSky.jpg;
 in {
   home.packages = with pkgs; [
+    brightnessctl
     swww
     grim
     slurp
