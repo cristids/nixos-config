@@ -1,9 +1,11 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-{ config, pkgs, ... }:
-
 {
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     ./boot.nix
     ./networking.nix
@@ -13,13 +15,12 @@
     ./kde.nix
     ./fonts.nix
     #./kde-unstable.nix
-    #./hyprland.nix
+    ./hyprland.nix
   ];
 
   nix.settings.download-buffer-size = 67108864;
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-#   nixpkgs.config.allowUnfree = true;
-
+  nix.settings.experimental-features = ["nix-command" "flakes"];
+  #   nixpkgs.config.allowUnfree = true;
 
   # Set your time zone.
   time.timeZone = "Europe/Bucharest";
@@ -39,8 +40,6 @@
     LC_TIME = "en_US.UTF-8";
   };
 
-
-
   #This allows X applications like chromium and electron to run without Xwayland
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
@@ -57,17 +56,36 @@
 
   hardware.sensor.iio.enable = true;
 
-  security.rtkit.enable = true;
+  #security.rtkit.enable = true;
 
+  security = {
+    rtkit.enable = true;
+    polkit = {
+      enable = true;
+      #extraConfig = ''
+      #    polkit.addRule(function(action, subject) {
+      #    if ( subject.isInGroup("users") && (
+      #     action.id == "org.freedesktop.login1.reboot" ||
+      #     action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+      #     action.id == "org.freedesktop.login1.power-off" ||
+      #     action.id == "org.freedesktop.login1.power-off-multiple-sessions"
+      #    ))
+      #    { return polkit.Result.YES; }
+      #  })
+      #'';
+    };
+    pam.services.swaylock = {
+      text = ''auth include login '';
+    };
+  };
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.cristian = {
     isNormalUser = true;
     description = "Cristian Stamateanu";
-    extraGroups = [ "networkmanager" "wheel" "scanner" "plugdev" "pipewire" "bluetooth" "audio" "video" "tablet" "input"];
+    extraGroups = ["networkmanager" "wheel" "scanner" "plugdev" "pipewire" "bluetooth" "audio" "video" "tablet" "input"];
     shell = pkgs.zsh;
     packages = with pkgs; [
-    #  thunderbird
+      #  thunderbird
     ];
   };
-
 }

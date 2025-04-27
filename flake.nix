@@ -10,16 +10,16 @@
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     stable.url = "github:NixOS/nixpkgs/nixos-24.11";
 
-    nvf = {
-     url = "github:notashelf/nvf";
-     # url = "github:howird/nvf";
-     # You can override the input nixpkgs to follow your system's
-     # instance of nixpkgs. This is safe to do as nvf does not depend
-     # on a binary cache.
-     inputs.nixpkgs.follows = "nixpkgs";
-     # Optionally, you can also override individual plugins
-     # for example:
-     # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
+    nvfpkgs = {
+      url = "github:notashelf/nvf";
+      # url = "github:howird/nvf";
+      # You can override the input nixpkgs to follow your system's
+      # instance of nixpkgs. This is safe to do as nvf does not depend
+      # on a binary cache.
+      inputs.nixpkgs.follows = "nixpkgs";
+      # Optionally, you can also override individual plugins
+      # for example:
+      # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
     };
 
     # nvchad4nix = {
@@ -39,16 +39,23 @@
     #   url = "github:BirdeeHub/nixCats-nvim";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
+
+    stylix = {
+      #url = "github:danth/stylix";
+      url = "github:danth/stylix/release-24.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
     self,
     nixpkgs,
     home-manager,
+    #stylix,
     ...
   } @ inputs: let
     system = "x86_64-linux";
-
+    timestamp = "$(date '+%Y-%m-%d_%H-%M-%S')";
     unstablePkgs = import inputs.unstable {
       inherit system;
       config.allowUnfree = true;
@@ -62,6 +69,7 @@
     sharedModules = [
       ./modules/core/configuration.nix
       home-manager.nixosModules.home-manager
+      #stylix.homeManagerModules.stylix
     ];
 
     mkHost = name: hostModules:
@@ -79,16 +87,17 @@
 
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "hm-bkp";
+              home-manager.backupFileExtension = "hm-bkp-${timestamp}";
               home-manager.users.cristian = import ./modules/home/home.nix;
               # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
               home-manager.extraSpecialArgs = {
                 unstable = unstablePkgs;
                 vars.hostName = name;
                 # nvchadModule = inputs.nvchad4nix.homeManagerModule;
-                nvfModule = inputs.nvf;
+                nvfpkgs = inputs.nvfpkgs;
                 # nixvim = inputs.nixvim;
                 # nixCats = inputs.nixCats;
+                stylixModule = inputs.stylix.homeManagerModules.stylix;
               };
             }
           ];

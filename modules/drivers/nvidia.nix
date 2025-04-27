@@ -1,7 +1,11 @@
 #nvidia.nix
-
-{ config, lib, pkgs, unstablePkgs, ... }:
-
+{
+  config,
+  lib,
+  pkgs,
+  unstablePkgs,
+  ...
+}:
 # let
 #   unstable = import <nixos-unstable> {
 #     config = {
@@ -17,9 +21,7 @@
   };
   services.xserver.videoDrivers = ["nvidia"];
 
-
   hardware.nvidia = {
-
     # Modesetting is required.
     modesetting.enable = true;
 
@@ -42,7 +44,7 @@
     open = true;
 
     # Enable the Nvidia settings menu,
-        # accessible via `nvidia-settings`.
+    # accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
@@ -59,12 +61,12 @@
     # };
 
     prime = {
-        offload = {
-                enable = true;
-                enableOffloadCmd = true;
-        };
-        intelBusId = "PCI:0:2:0";
-        nvidiaBusId = "PCI:1:0:0";
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;
+      };
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:1:0:0";
     };
   };
 }

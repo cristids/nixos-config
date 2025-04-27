@@ -1,11 +1,11 @@
 {
   config,
   pkgs,
-  nvfModule,
+  nvfpkgs,
   ...
 }: {
   imports = [
-    nvfModule.homeManagerModules.default
+    nvfpkgs.homeManagerModules.default
   ];
 
   programs.nvf = {
@@ -228,7 +228,7 @@
         chatgpt.enable = false;
         copilot = {
           enable = true;
-          cmp.enable = true;
+          cmp.enable = false;
         };
         codecompanion-nvim.enable = true;
       };
