@@ -24,6 +24,7 @@ in
             "cpu"
             "memory"
             "idle_inhibitor"
+            "power-profiles-daemon"
           ];
           modules-right = [
             "custom/hyprbindings"
@@ -45,10 +46,11 @@ in
             on-scroll-down = "hyprctl dispatch workspace e-1";
           };
           "clock" = {
-            format =
-              if clock24h == true
-              then '' {:l%h:%m}''
-              else '' {:L%I:%M %p}'';
+            format = "  {:%H:%M %a}";
+            #format = "  {:l%h:%m}";
+            #if clock24h == true
+            #then '' {:l%h:%m}''
+            #else '' {:L%I:%M %p}'';
             tooltip = true;
             tooltip-format = "<big>{:%A, %d.%B %Y }</big>\n<tt><small>{calendar}</small></tt>";
           };
@@ -88,6 +90,17 @@ in
           };
           "tray" = {
             spacing = 12;
+          };
+          "power-profiles-daemon" = {
+            "format" = "{icon}";
+            "tooltip-format" = "Power profile: {profile}\nDriver: {driver}";
+            "tooltip" = true;
+            "format-icons" = {
+              "default" = "";
+              "performance" = "";
+              "balanced" = "";
+              "power-saver" = "";
+            };
           };
           "pulseaudio" = {
             format = "{icon} {volume}% {format_source}";
@@ -235,7 +248,7 @@ in
           tooltip label {
             color: #${config.lib.stylix.colors.base08};
           }
-          #window, #pulseaudio, #cpu, #memory, #idle_inhibitor {
+          #window, #pulseaudio, #cpu, #memory, #idle_inhibitor, #power-profiles-daemon {
             font-weight: bold;
             margin: 4px 0px;
             margin-left: 7px;
