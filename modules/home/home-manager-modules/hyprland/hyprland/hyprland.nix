@@ -51,6 +51,7 @@ in {
         "killall -q swaync;sleep .5 && swaync"
         "nm-applet --indicator"
         "pypr &"
+        "iio-sensor-proxy &"
         "sleep 1.5 && swww img ${stylixImage}"
       ];
 

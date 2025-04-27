@@ -33,6 +33,8 @@
     ./xdg.nix
     ./zoxide.nix
     ./zsh
+    ./iiorient.nix
+    ./iior.nix
   ];
   #    ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;
 }
