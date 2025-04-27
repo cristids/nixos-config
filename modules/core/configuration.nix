@@ -23,7 +23,7 @@
 
   #automatically remove generations older than 14d
   nix.gc.automatic = true;
-  nix.gc.options = "--delete-older-than 14d"
+  nix.gc.options = "--delete-older-than 14d";
 
   #   nixpkgs.config.allowUnfree = true;
 
