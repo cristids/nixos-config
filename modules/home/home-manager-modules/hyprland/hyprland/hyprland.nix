@@ -171,6 +171,7 @@ in {
     };
 
     extraConfig = "
+      source = ~/.config/hypr/monitors.conf
       monitor=,preferred,auto,auto
     ";
   };
