@@ -20,6 +20,7 @@ in
           modules-left = [
             "custom/startmenu"
             "hyprland/window"
+            "wlr/taskbar"
             "pulseaudio"
             "cpu"
             "memory"
@@ -59,6 +60,21 @@ in
             separate-outputs = false;
             rewrite = {
               "" = " 🙈 No Windows? ";
+            };
+          };
+          "wlr/taskbar" = {
+            "format" = "{icon}";
+            "icon-size" = 18;
+            "tooltip-format" = "{title}";
+            "on-click" = "activate";
+            "on-click-middle" = "close";
+            "ignore-list" = ["Alacritty" "kitty"];
+            "app_ids-mapping" = {
+              "firefoxdeveloperedition" = "firefox-developer-edition";
+            };
+            "rewrite" = {
+              "Firefox Web Browser" = "Firefox";
+              "Foot Server" = "Terminal";
             };
           };
           "memory" = {
