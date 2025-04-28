@@ -1,7 +1,8 @@
-{ config, pkgs, ... }:
-
 {
-
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     ./home-manager-modules
   ];
@@ -26,6 +27,7 @@
     # (nerdfonts.override { fonts = [ "FiraCode" "Meslo" ]; })
     # fonts.packages = [ ... ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts)
     nerd-fonts.fira-code
+    nerd-fonts.fira-mono
     # nerd-fonts.meslo-lgs-nf
 
     # # Adds the 'hello' command to your environment. It prints a friendly
@@ -86,8 +88,7 @@
 
   programs.fzf = {
     enable = true;
-#     enableBashIntegration = true;
+    #     enableBashIntegration = true;
     enableZshIntegration = true;
   };
-   
 }
