@@ -107,5 +107,19 @@
       dell-nix = mkHost "dell-nix" [./hosts/dell-nix];
       gpdp4-nix = mkHost "gpdp4-nix" [./hosts/gpdp4-nix];
     };
+
+    # ADDED: Support for nh and tools expecting packages
+    packages = {
+      x86_64-linux = {
+        gpdp4-nix = self.nixosConfigurations.gpdp4-nix;
+        dell-nix = self.nixosConfigurations.dell-nix;
+
+        #ADDED: default points to gpdp4-nix's system build
+        #default = self.nixosConfigurations.gpdp4-nix.config.system.build.toplevel;
+      };
+    };
+
+    # ✅ ADDED: For tools like nix build/run .#
+    #defaultPackage.x86_64-linux = self.packages.x86_64-linux.default;
   };
 }

@@ -47,6 +47,7 @@
 
   #This allows X applications like chromium and electron to run without Xwayland
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  environment.sessionVariables.FLAKE = "/home/cristian/cristids/nixos-config";
 
   # Enable sound with pipewire.
 
