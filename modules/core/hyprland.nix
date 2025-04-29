@@ -13,10 +13,6 @@
   programs.hyprlock.enable = true;
 
   programs.uwsm.enable = true;
-  programs.waybar = {
-    enable = false;
-    #      package = pkgs.waybar-hyprland;
-  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -24,7 +20,6 @@
     uwsm
     kitty
     xdg-desktop-portal-hyprland
-    #        kanshi
     networkmanagerapplet
   ];
 }

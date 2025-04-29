@@ -25,6 +25,7 @@
     # ./nixvim.nix
     # ./nvchad.nix
     # ./neovim.nix
+    ./nh.nix
     ./nvf.nix
     ./stylix.nix
     ./ohmyposh.nix

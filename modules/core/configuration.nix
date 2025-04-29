@@ -18,7 +18,7 @@
     ./hyprland.nix
   ];
 
-  nix.settings.download-buffer-size = 67108864;
+  nix.settings.download-buffer-size = 536870912; # 512 MiB;
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
   #automatically remove generations older than 14d
