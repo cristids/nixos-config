@@ -27,6 +27,7 @@
     # ./neovim.nix
     ./nh.nix
     ./nvf.nix
+    ./services.nix
     ./stylix.nix
     ./ohmyposh.nix
     # ./vscode.nix
