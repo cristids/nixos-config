@@ -20,6 +20,7 @@
     ./gtk.nix
     ./htop.nix
     ./hyprland
+    ./helix.nix
     ./kitty.nix
     # ./nixcats-nvim.nix
     # ./nixvim.nix
