@@ -19,7 +19,7 @@ in
           modules-center = ["hyprland/workspaces"];
           modules-left = [
             "custom/startmenu"
-            "hyprland/window"
+            #"hyprland/window"
             "wlr/taskbar"
             "pulseaudio"
             "cpu"
@@ -32,6 +32,8 @@ in
             "custom/notification"
             "custom/exit"
             "battery"
+            "network"
+            "bluetooth"
             "tray"
             "clock"
           ];
@@ -99,11 +101,21 @@ in
               "󰤥"
               "󰤨"
             ];
-            format-ethernet = " {bandwidthDownOctets}";
-            format-wifi = "{icon} {signalStrength}%";
-            format-disconnected = "󰤮";
+            format-ethernet = "  {ifname}  {bandwidthDownOctets}";
+            format-wifi = " {essid} ({signalStrength}%)";
+            format-disconnected = "Disconnected ⚠";
             tooltip = false;
           };
+
+          "bluetooth" = {
+            "format" = " {status}";
+            "format-disabled" = "";
+            "format-off" = "";
+            "interval" = 30;
+            "on-click" = "blueman-manager";
+            "format-no-controller" = "";
+          };
+
           "tray" = {
             spacing = 12;
           };
@@ -282,7 +294,7 @@ in
             border-radius: 0px 0px 40px 0px;
           }
           #custom-hyprbindings, #network, #battery,
-          #custom-notification, #tray, #custom-exit {
+          #custom-notification, #tray, #custom-exit, #bluetooth {
             font-weight: bold;
             background: #${config.lib.stylix.colors.base0F};
             color: #${config.lib.stylix.colors.base00};

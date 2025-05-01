@@ -127,7 +127,9 @@
           dap.debugger = "debugpy";
           format.enable = true;
           lsp.enable = true;
-          lsp.server = "python-lsp-server";
+          #lsp.server = "python-lsp-server"; #pylsp
+          #lsp.server = "pyright";
+          lsp.server = "basedpyright";
           treesitter.enable = true;
         };
         markdown.enable = true;

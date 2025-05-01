@@ -1,12 +1,15 @@
-{ pkgs, config,  ... }:
 {
+  pkgs,
+  config,
+  ...
+}: {
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm = {
-      enable = true;
-      wayland.enable = true;
+    enable = true;
+    wayland.enable = true;
   };
   services.desktopManager.plasma6 = {
-      enable = true;
+    enable = true;
   };
 
   nixpkgs.config.allowUnfree = true;
@@ -17,7 +20,10 @@
     kdePackages.kcmutils
     kdePackages.plymouth-kcm
     kdePackages.kdeplasma-addons
+    kdePackages.gwenview
+    kdePackages.kimageformats
+    kdePackages.qtimageformats
     maliit-keyboard
-
   ];
 }
+
