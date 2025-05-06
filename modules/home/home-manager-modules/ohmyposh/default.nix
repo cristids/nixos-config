@@ -1,0 +1,6 @@
+{...}:
+{
+  imports = [
+    ./ohmyposh.nix
+  ];
+}

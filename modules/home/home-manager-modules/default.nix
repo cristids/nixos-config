@@ -30,7 +30,8 @@
     ./nvf.nix
     ./kanshi.nix
     ./stylix.nix
-    ./ohmyposh.nix
+    #./starship.nix
+    ./ohmyposh
     # ./vscode.nix
     ./wezterm.nix
     ./xdg.nix
