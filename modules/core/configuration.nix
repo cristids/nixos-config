@@ -16,6 +16,7 @@
     ./fonts.nix
     #./kde-unstable.nix
     ./hyprland.nix
+    ./cosmic.nix
   ];
 
   nix.settings.download-buffer-size = 536870912; # 512 MiB;
