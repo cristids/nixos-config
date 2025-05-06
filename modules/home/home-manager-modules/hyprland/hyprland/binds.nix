@@ -24,6 +24,7 @@ in {
       "$modifier,T,exec,pypr toggle term"
       "$modifier,M,exec,pavucontrol"
       "$modifier,Q,killactive,"
+      "$modifier,L,exec, hyprlock"
       "$modifier ALT,P,pseudo,"
       "$modifier ALT,V,exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
       "$modifier SHIFT,I,togglesplit,"
