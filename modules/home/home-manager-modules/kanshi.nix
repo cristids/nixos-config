@@ -36,7 +36,7 @@
           outputs = [
             {
               criteria = "Samsung Display Corp. 0x414D Unknown";
-              scale = 2;
+              scale = 2.0;
               status = "enable";
             }
           ];
