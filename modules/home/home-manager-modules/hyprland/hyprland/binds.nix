@@ -1,6 +1,6 @@
 {...}: let
   browser = "firefox";
-  terminal = "ghostty";
+  terminal = "kitty";
 in {
   wayland.windowManager.hyprland.settings = {
     bind = [
@@ -14,24 +14,31 @@ in {
       "$modifier,Y,exec,kitty -e yazi"
       "$modifier,E,exec,emopicker9000"
       "$modifier,S,exec,screenshootin"
-      "$modifier,D,exec,discord"
+      "$modifier,D,exec,dolphin"
+      "$modifier,P,exec,1password"
+      "$modifier,V,exec,code"
+      "$modifier,A,exec,azuredatastudio"
       "$modifier,O,exec,obs"
       "$modifier,C,exec,hyprpicker -a"
       "$modifier,G,exec,gimp"
       "$modifier,T,exec,pypr toggle term"
       "$modifier,M,exec,pavucontrol"
       "$modifier,Q,killactive,"
-      "$modifier,P,pseudo,"
-      "$modifier,V,exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+      "$modifier ALT,P,pseudo,"
+      "$modifier ALT,V,exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
       "$modifier SHIFT,I,togglesplit,"
       "$modifier,F,fullscreen,"
       "$modifier SHIFT,F,togglefloating,"
       "$modifier ALT,F,workspaceopt, allfloat"
       "$modifier SHIFT,C,exit,"
-      "$modifier SHIFT,left,movewindow,l"
-      "$modifier SHIFT,right,movewindow,r"
-      "$modifier SHIFT,up,movewindow,u"
-      "$modifier SHIFT,down,movewindow,d"
+      # "$modifier SHIFT,left,movewindow,l"
+      # "$modifier SHIFT,right,movewindow,r"
+      # "$modifier SHIFT,up,movewindow,u"
+      # "$modifier SHIFT,down,movewindow,d"
+      "$modifier SHIFT, right, resizeactive, 100 0" # Increase window width with keyboard
+      "$modifier SHIFT, left, resizeactive, -100 0" # Reduce window width with keyboard
+      "$modifier SHIFT, down, resizeactive, 0 100" # Increase window height with keyboard
+      "$modifier SHIFT, up, resizeactive, 0 -100" # Reduce window height with keyboard
       "$modifier SHIFT,h,movewindow,l"
       "$modifier SHIFT,l,movewindow,r"
       "$modifier SHIFT,k,movewindow,u"
@@ -82,7 +89,7 @@ in {
       "ALT,Tab,bringactivetotop"
       ",XF86AudioRaiseVolume,exec,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
       ",XF86AudioLowerVolume,exec,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-      " ,XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+      ",XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
       ",XF86AudioPlay, exec, playerctl play-pause"
       ",XF86AudioPause, exec, playerctl play-pause"
       ",XF86AudioNext, exec, playerctl next"
