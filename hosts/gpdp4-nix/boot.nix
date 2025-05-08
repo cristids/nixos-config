@@ -64,7 +64,7 @@ in {
     loader = {
       #grub.package = grub2-fbrot;
       systemd-boot.enable = false;
-      grub.enable = true;
+      grub.enable = false;
       grub.device = "nodev";
       grub.useOSProber = true;
       grub.efiSupport = true;
@@ -88,6 +88,16 @@ in {
       # echo "write_byte 0x45da4116 0x1f"
 
       # grub.extraModules = [ "memrw" ];
+
+      limine = {
+        enable = true;
+        enableEditor = true;
+        style = {
+          #wallpapers = [pkgs.nixos-artwork.wallpapers.simple-dark-gray-bootloader.gnomeFilePath];
+          wallpapers = [ ../../modules/home/wallpapers/Tree_dark.png];
+          # interface.resolution = "1600x2560";
+        };
+      };
     };
 
     kernelPatches = [
