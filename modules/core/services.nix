@@ -13,9 +13,19 @@
     blueman.enable = true; # Bluetooth Support
     tumbler.enable = true; # Image/video preview
 
+    btrfs.autoScrub = {
+      enable = true;
+      interval = "weekly"; # You can also use "monthly"
+      fileSystems = ["/"]; # Add other Btrfs mount points if needed
+    };
+
     smartd = {
       enable = true;
       autodetect = true;
+      notifications = {
+        mail.enable = false;
+        wall.enable = true; # Shows alerts in the terminal
+      };
     };
 
     pulseaudio.enable = false;
