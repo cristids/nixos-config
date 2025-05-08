@@ -4,17 +4,6 @@
     systemdTarget = "hyprland-session.target";
 
     settings = [
-      #      {
-      #        output = {
-      #          criteria = "HSX YHB03P24 0x00888888";
-      #          mode = "1600x2560@60";
-      #          scale = 1.6;
-      #          status = "enable";
-      #          position = "0x0";
-      #          transform = "270";
-      #        };
-      #      }
-
       {
         profile = {
           name = "undocked_gpd";
@@ -56,9 +45,6 @@
             {
               criteria = "HSX YHB03P24 0x00888888";
               status = "disable";
-              transform = "270";
-              mode = "1600x2560@144";
-              scale = 1.0;
             }
           ];
         };
@@ -76,10 +62,75 @@
             }
             {
               criteria = "Samsung Display Corp. 0x414D Unknown";
-              mode = "3456x2160@60";
-              scale = 1.6;
               status = "disable";
+            }
+          ];
+        };
+      }
+
+      {
+        profile = {
+          name = "home";
+          outputs = [
+            {
+              criteria = "eDP-1";
+              status = "disable";
+            }
+            {
+              criteria = "DP-2";
+              mode = "5120x2880";
+              position = "0,0"; #= ((Odyssey h) - ((DP-2 h) /2))/2 = (2160 - (2880/2))/2 = 360
+              scale = 2.0;
+            }
+            {
+              criteria = "DP-3";
+              status = "disable";
+            }
+            {
+              criteria = "Samsung Electric Company Odyssey G8 HNBW900015";
+              position = "2560,0";
+              mode = "3840x2160";
+              scale = 1.5;
+            }
+          ];
+        };
+      }
+
+      {
+        profile = {
+          name = "home_ody";
+          outputs = [
+            {
+              criteria = "eDP-1";
+              status = "disable";
+            }
+            {
+              criteria = "Samsung Electric Company Odyssey G8 HNBW900015";
               position = "0,0";
+              mode = "3840x2160";
+              scale = 1.5;
+            }
+          ];
+        };
+      }
+
+      {
+        profile = {
+          name = "home_apple";
+          outputs = [
+            {
+              criteria = "eDP-1";
+              status = "disable";
+            }
+            {
+              criteria = "DP-2";
+              position = "0,0";
+              mode = "5120x2880";
+              scale = 2.0;
+            }
+            {
+              criteria = "DP-3";
+              status = "disable";
             }
           ];
         };
