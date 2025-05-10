@@ -11,7 +11,7 @@ in {
     affine
     #azuredatastudio
     customAzureDataStudio
-    vscode
+    #vscode
     wl-clipboard
     amfora
     eog

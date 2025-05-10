@@ -32,7 +32,7 @@
     ./stylix.nix
     #./starship.nix
     ./ohmyposh
-    # ./vscode.nix
+    ./vscode.nix
     ./wezterm.nix
     ./xdg.nix
     ./zoxide.nix
