@@ -21,6 +21,7 @@
 
         #python
         ms-python.python
+        ms-python.debugpy
         ms-python.black-formatter
         ms-python.flake8
         ms-python.mypy-type-checker
@@ -33,7 +34,7 @@
         #oops418.nix-env-picker
       ])
       ++ (with vscode_exts; [
-        #sql server
+      #   #sql server
         ms-mssql.mssql
         ms-mssql.sql-database-projects-vscode
       ])

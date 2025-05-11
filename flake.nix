@@ -46,19 +46,23 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix4vscode = {
-      url = "github:nix-community/nix4vscode";
-      inputs.nixpkgs.follows = "nixpkgs";
+    # nix4vscode = {
+    #   url = "github:nix-community/nix4vscode";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
+    nix-vscode-extensions = {
+      url = "github:nix-community/nix-vscode-extensions/00e11463876a04a77fb97ba50c015ab9e5bee90d";
+      #inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/00e11463876a04a77fb97ba50c015ab9e5bee90d";
   };
 
   outputs = {
     self,
     nixpkgs,
     home-manager,
-    nix4vscode,
+    # nix4vscode,
     #stylix,
     ...
   } @ inputs: let
@@ -66,9 +70,9 @@
     unstablePkgs = import inputs.unstable {
       inherit system;
       config.allowUnfree = true;
-      overlays = [
-        nix4vscode.overlays.forVscode
-      ];
+      # overlays = [
+      #   nix4vscode.overlays.forVscode
+      # ];
     };
 
     stablePkgs = import inputs.stable {
@@ -110,7 +114,7 @@
                 # nixvim = inputs.nixvim;
                 # nixCats = inputs.nixCats;
                 stylixModule = inputs.stylix.homeManagerModules.stylix;
-                nix4vscode = inputs.nix4vscode;
+                # nix4vscode = inputs.nix4vscode;
                 vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
               };
             }
