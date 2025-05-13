@@ -22,10 +22,10 @@
       # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
     };
 
-    # nvchad4nix = {
-    #   url = "github:nix-community/nix4nvchad";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    nix4nvchad = {
+      url = "github:nix-community/nix4nvchad";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # nixvim = {
     #   url = "github:nix-community/nixvim";
@@ -36,8 +36,9 @@
     # };
 
     # nixCats = {
-    #   url = "github:BirdeeHub/nixCats-nvim";
-    #   inputs.nixpkgs.follows = "nixpkgs";
+    #   #url = "github:BirdeeHub/nixCats-nvim";
+    #   url = "github:BirdeeHub/nixCats-nvim?dir=templates/LazyVim";
+    #   #inputs.nixpkgs.follows = "nixpkgs";
     # };
 
     stylix = {
@@ -62,6 +63,7 @@
     self,
     nixpkgs,
     home-manager,
+    # nixCats,
     # nix4vscode,
     #stylix,
     ...
@@ -109,13 +111,13 @@
               home-manager.extraSpecialArgs = {
                 unstable = unstablePkgs;
                 vars.hostName = name;
-                # nvchadModule = inputs.nvchad4nix.homeManagerModule;
+                nvchadModule = inputs.nix4nvchad.homeManagerModule;
                 nvfpkgs = inputs.nvfpkgs;
                 # nixvim = inputs.nixvim;
-                # nixCats = inputs.nixCats;
                 stylixModule = inputs.stylix.homeManagerModules.stylix;
                 # nix4vscode = inputs.nix4vscode;
                 vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
+                # inherit nixCats;
               };
             }
           ];
@@ -137,7 +139,7 @@
       };
     };
 
-    # ✅ ADDED: For tools like nix build/run .#
+    #ADDED: For tools like nix build/run .#
     #defaultPackage.x86_64-linux = self.packages.x86_64-linux.default;
   };
 }

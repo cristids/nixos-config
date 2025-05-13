@@ -5,7 +5,7 @@
   ];
   
   programs.nvchad = {
-    enable = true;
+    enable = false;
     extraPackages = with pkgs; [
       # nodePackages.bash-language-server
       # docker-compose-language-service
@@ -19,7 +19,7 @@
       fzf
       nixd
       ripgrep
-      vimPlugins.nvim-dap
+      vimPlugins.nvim-daptrue
       vimPlugins.nvim-dap-python
       (python3.withPackages(ps: with ps; [
         python-lsp-server

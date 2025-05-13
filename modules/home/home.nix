@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  # nixCats,
   ...
 }: {
   imports = [
@@ -23,7 +24,7 @@
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
-  home.packages = with pkgs; [
+  home.packages = (with pkgs; [
     # (nerdfonts.override { fonts = [ "FiraCode" "Meslo" ]; })
     # fonts.packages = [ ... ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts)
     nerd-fonts.fira-code
@@ -46,7 +47,10 @@
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
-  ];
+  ]);
+  # ++ (with nixCats; [
+  #     packages.${pkgs.system}.nvim
+  # ]);
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.

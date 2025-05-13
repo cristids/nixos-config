@@ -22,10 +22,9 @@
     ./hyprland
     ./helix.nix
     ./kitty.nix
-    # ./nixcats-nvim.nix
     # ./nixvim.nix
-    # ./nvchad.nix
-    # ./neovim.nix
+    ./nvchad.nix
+    ./neovim.nix
     ./nh.nix
     ./nvf.nix
     ./kanshi.nix
