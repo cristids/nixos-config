@@ -23,10 +23,10 @@
     ./helix.nix
     ./kitty.nix
     # ./nixvim.nix
-    ./nvchad.nix
-    ./neovim.nix
+    # ./nvchad.nix
+    # ./neovim.nix
     ./nh.nix
-    ./nvf.nix
+    # ./nvf.nix
     ./kanshi.nix
     ./stylix.nix
     #./starship.nix

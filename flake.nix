@@ -10,22 +10,22 @@
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     stable.url = "github:NixOS/nixpkgs/nixos-24.11";
 
-    nvfpkgs = {
-      url = "github:notashelf/nvf";
-      # url = "github:howird/nvf";
-      # You can override the input nixpkgs to follow your system's
-      # instance of nixpkgs. This is safe to do as nvf does not depend
-      # on a binary cache.
-      inputs.nixpkgs.follows = "nixpkgs";
-      # Optionally, you can also override individual plugins
-      # for example:
-      # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
-    };
+    # nvfpkgs = {
+    #   url = "github:notashelf/nvf";
+    #   # url = "github:howird/nvf";
+    #   # You can override the input nixpkgs to follow your system's
+    #   # instance of nixpkgs. This is safe to do as nvf does not depend
+    #   # on a binary cache.
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    #   # Optionally, you can also override individual plugins
+    #   # for example:
+    #   # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
+    # };
 
-    nix4nvchad = {
-      url = "github:nix-community/nix4nvchad";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # nix4nvchad = {
+    #   url = "github:nix-community/nix4nvchad";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     # nixvim = {
     #   url = "github:nix-community/nixvim";
@@ -35,11 +35,12 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    # nixCats = {
-    #   #url = "github:BirdeeHub/nixCats-nvim";
-    #   url = "github:BirdeeHub/nixCats-nvim?dir=templates/LazyVim";
-    #   #inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    nixCats = {
+      #url = "github:BirdeeHub/nixCats-nvim";
+      # url = "github:BirdeeHub/nixCats-nvim?dir=templates/kickstart-nvim";
+      #inputs.nixpkgs.follows = "nixpkgs";
+      url =  "github:cristids/nixcats";
+    };
 
     stylix = {
       #url = "github:danth/stylix";
@@ -52,6 +53,7 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
+    # This flake adds mssql and sqltools extensions to the vscode
     nix-vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions/00e11463876a04a77fb97ba50c015ab9e5bee90d";
       #inputs.nixpkgs.follows = "nixpkgs";
@@ -63,7 +65,7 @@
     self,
     nixpkgs,
     home-manager,
-    # nixCats,
+    nixCats,
     # nix4vscode,
     #stylix,
     ...
@@ -111,13 +113,13 @@
               home-manager.extraSpecialArgs = {
                 unstable = unstablePkgs;
                 vars.hostName = name;
-                nvchadModule = inputs.nix4nvchad.homeManagerModule;
-                nvfpkgs = inputs.nvfpkgs;
+                # nvchadModule = inputs.nix4nvchad.homeManagerModule;
+                # nvfpkgs = inputs.nvfpkgs;
                 # nixvim = inputs.nixvim;
                 stylixModule = inputs.stylix.homeManagerModules.stylix;
                 # nix4vscode = inputs.nix4vscode;
                 vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
-                # inherit nixCats;
+                inherit nixCats;
               };
             }
           ];

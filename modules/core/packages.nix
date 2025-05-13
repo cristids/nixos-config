@@ -81,7 +81,7 @@
 
     obs-studio
     onlyoffice-desktopeditors
-    libreoffice-qt-fresh
+    #libreoffice-qt-fresh
     zoom-us
     tlrc
     hplip

@@ -1,7 +1,7 @@
 {
   config,
   pkgs,
-  # nixCats,
+  nixCats,
   ...
 }: {
   imports = [
@@ -47,10 +47,11 @@
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
+  ])
+  # ;
+  ++ (with nixCats; [
+      packages.${pkgs.system}.nvim
   ]);
-  # ++ (with nixCats; [
-  #     packages.${pkgs.system}.nvim
-  # ]);
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
