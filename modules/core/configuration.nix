@@ -106,6 +106,7 @@
       "tablet"
       "input"
       "adbusers"
+      "dialout"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
