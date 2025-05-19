@@ -2,11 +2,13 @@
   pkgs,
   inputs,
   ...
-}: {
+}:
+{
   programs = {
     firefox.enable = true; # Firefox is not installed by default
     dconf.enable = true;
     mtr.enable = true;
+    adb.enable = true;
 
     steam = {
       enable = true;
@@ -14,7 +16,7 @@
       #dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
       #localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
       gamescopeSession.enable = true;
-      extraCompatPackages = [pkgs.proton-ge-bin];
+      extraCompatPackages = [ pkgs.proton-ge-bin ];
     };
 
     gamescope = {
@@ -65,7 +67,7 @@
     usbutils # Good Tools For USB Devices
     v4l-utils # Used For Things Like OBS Virtual Camera
     wget # Tool For Fetching Files With Links
-    yazi #TUI File Manager
+    yazi # TUI File Manager
 
     wget
     # vscode

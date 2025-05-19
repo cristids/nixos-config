@@ -5,7 +5,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     ./boot.nix
     ./networking.nix
@@ -20,7 +21,10 @@
   ];
 
   nix.settings.download-buffer-size = 536870912; # 512 MiB;
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   #automatically remove generations older than 14d
   nix.gc.automatic = true;
@@ -89,7 +93,19 @@
   users.users.cristian = {
     isNormalUser = true;
     description = "Cristian Stamateanu";
-    extraGroups = ["networkmanager" "wheel" "scanner" "plugdev" "pipewire" "bluetooth" "audio" "video" "tablet" "input"];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "scanner"
+      "plugdev"
+      "pipewire"
+      "bluetooth"
+      "audio"
+      "video"
+      "tablet"
+      "input"
+      "adbusers"
+    ];
     shell = pkgs.zsh;
     packages = with pkgs; [
       #  thunderbird

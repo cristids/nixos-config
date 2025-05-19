@@ -4,7 +4,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   # nixpkgs.overlays = [
   #   (import ./grub-overlay.nix)
   # ];
@@ -15,6 +16,7 @@
     ./fprintd.nix
     ../../modules/drivers/amd.nix
     #./hhd.nix
+    #./laptop.nix
   ];
 
   # This indicates the version of the system at the time of the first install.
