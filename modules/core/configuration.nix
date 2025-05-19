@@ -13,10 +13,11 @@
     ./services.nix
     ./packages.nix
     ./zsh.nix
-    ./kde.nix
+    #./kde.nix
     ./fonts.nix
+    ./wayland
     #./kde-unstable.nix
-    ./hyprland.nix
+    #./hyprland.nix
     #./cosmic.nix
   ];
 
