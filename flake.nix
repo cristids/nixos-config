@@ -107,7 +107,7 @@
 
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = ".hm-bkp-${lastModified}";
+              home-manager.backupFileExtension = "hm-bkp-${lastModified}";
               home-manager.users.cristian = import ./modules/home/home.nix;
               # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
               home-manager.extraSpecialArgs = {
