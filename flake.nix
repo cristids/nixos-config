@@ -36,10 +36,8 @@
     # };
 
     nixCats = {
-      #url = "github:BirdeeHub/nixCats-nvim";
-      # url = "github:BirdeeHub/nixCats-nvim?dir=templates/kickstart-nvim";
-      #inputs.nixpkgs.follows = "nixpkgs";
-      url =  "github:cristids/nixcats";
+      url = "github:cristids/nixcats";
+      #url = "path:/home/cristian/cristids/nixcats";
     };
 
     stylix = {
@@ -61,87 +59,91 @@
 
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    nixCats,
-    # nix4vscode,
-    #stylix,
-    ...
-  } @ inputs: let
-    system = "x86_64-linux";
-    unstablePkgs = import inputs.unstable {
-      inherit system;
-      config.allowUnfree = true;
-      # overlays = [
-      #   nix4vscode.overlays.forVscode
-      # ];
-    };
-
-    stablePkgs = import inputs.stable {
-      inherit system;
-      config.allowUnfree = true;
-    };
-
-    sharedModules = [
-      ./modules/core/configuration.nix
-      home-manager.nixosModules.home-manager
-      #stylix.homeManagerModules.stylix
-    ];
-
-    lastModified = toString self.lastModified;
-
-    mkHost = name: hostModules:
-      nixpkgs.lib.nixosSystem {
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      nixCats,
+      # nix4vscode,
+      #stylix,
+      ...
+    }@inputs:
+    let
+      system = "x86_64-linux";
+      unstablePkgs = import inputs.unstable {
         inherit system;
-        specialArgs = {
-          inherit inputs unstablePkgs stablePkgs;
+        config.allowUnfree = true;
+        # overlays = [
+        #   nix4vscode.overlays.forVscode
+        # ];
+      };
+
+      stablePkgs = import inputs.stable {
+        inherit system;
+        config.allowUnfree = true;
+      };
+
+      sharedModules = [
+        ./modules/core/configuration.nix
+        home-manager.nixosModules.home-manager
+        #stylix.homeManagerModules.stylix
+      ];
+
+      lastModified = toString self.lastModified;
+
+      mkHost =
+        name: hostModules:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit inputs unstablePkgs stablePkgs;
+          };
+          modules =
+            sharedModules
+            ++ hostModules
+            ++ [
+              {
+                networking.hostName = name;
+
+                home-manager.useGlobalPkgs = true;
+                home-manager.useUserPackages = true;
+                home-manager.backupFileExtension = "hm-bkp-${lastModified}";
+                home-manager.users.cristian = import ./modules/home/home.nix;
+                # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
+                home-manager.extraSpecialArgs = {
+                  unstable = unstablePkgs;
+                  vars.hostName = name;
+                  # nvchadModule = inputs.nix4nvchad.homeManagerModule;
+                  # nvfpkgs = inputs.nvfpkgs;
+                  # nixvim = inputs.nixvim;
+                  stylixModule = inputs.stylix.homeManagerModules.stylix;
+                  # nix4vscode = inputs.nix4vscode;
+                  vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
+                  inherit nixCats;
+                };
+              }
+            ];
         };
-        modules =
-          sharedModules
-          ++ hostModules
-          ++ [
-            {
-              networking.hostName = name;
-
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "hm-bkp-${lastModified}";
-              home-manager.users.cristian = import ./modules/home/home.nix;
-              # Optionally, use home-manager.extraSpecialArgs to pass arguments to home.nix
-              home-manager.extraSpecialArgs = {
-                unstable = unstablePkgs;
-                vars.hostName = name;
-                # nvchadModule = inputs.nix4nvchad.homeManagerModule;
-                # nvfpkgs = inputs.nvfpkgs;
-                # nixvim = inputs.nixvim;
-                stylixModule = inputs.stylix.homeManagerModules.stylix;
-                # nix4vscode = inputs.nix4vscode;
-                vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
-                inherit nixCats;
-              };
-            }
-          ];
+    in
+    {
+      nixosConfigurations = {
+        dell-nix = mkHost "dell-nix" [ ./hosts/dell-nix ];
+        gpdp4-nix = mkHost "gpdp4-nix" [ ./hosts/gpdp4-nix ];
       };
-  in {
-    nixosConfigurations = {
-      dell-nix = mkHost "dell-nix" [./hosts/dell-nix];
-      gpdp4-nix = mkHost "gpdp4-nix" [./hosts/gpdp4-nix];
-    };
 
-    # ADDED: Support for nh and tools expecting packages
-    packages = {
-      x86_64-linux = {
-        gpdp4-nix = self.nixosConfigurations.gpdp4-nix;
-        dell-nix = self.nixosConfigurations.dell-nix;
+      # ADDED: Support for nh and tools expecting packages
+      packages = {
+        x86_64-linux = {
+          gpdp4-nix = self.nixosConfigurations.gpdp4-nix;
+          dell-nix = self.nixosConfigurations.dell-nix;
 
-        #ADDED: default points to gpdp4-nix's system build
-        #default = self.nixosConfigurations.gpdp4-nix.config.system.build.toplevel;
+          #ADDED: default points to gpdp4-nix's system build
+          #default = self.nixosConfigurations.gpdp4-nix.config.system.build.toplevel;
+        };
       };
-    };
 
-    #ADDED: For tools like nix build/run .#
-    #defaultPackage.x86_64-linux = self.packages.x86_64-linux.default;
-  };
+      #ADDED: For tools like nix build/run .#
+      #defaultPackage.x86_64-linux = self.packages.x86_64-linux.default;
+    };
 }
