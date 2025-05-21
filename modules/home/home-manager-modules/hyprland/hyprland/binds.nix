@@ -1,5 +1,5 @@
 {...}: let
-  browser = "firefox";
+  browser = "brave";
   terminal = "kitty";
 in {
   wayland.windowManager.hyprland.settings = {
