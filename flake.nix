@@ -36,7 +36,7 @@
     # };
 
     nixCats = {
-      url = "github:cristids/nixcats";
+      url = "github:cristids/nixcats"; # if not pulled ok do : nix flake update nixCats  before rebuilding
       #url = "path:/home/cristian/cristids/nixcats";
     };
 
