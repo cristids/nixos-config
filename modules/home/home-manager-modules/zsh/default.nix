@@ -14,9 +14,9 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
-    initExtra = ''
-      export PATH="$HOME/.config/emacs/bin:$PATH"
-    '';
+    #initExtra = ''
+    #  export PATH="$HOME/.config/emacs/bin:$PATH"
+    #'';
 
     plugins = [
       {
@@ -89,6 +89,7 @@
       if [ -f $HOME/.zshrc-personal ]; then
         source $HOME/.zshrc-personal
       fi
+      export PATH="$HOME/.config/emacs/bin:$PATH"
     '';
 
     shellAliases = {
@@ -96,7 +97,6 @@
       v = "nvim";
       c = "clear";
       emacs = "emacs --init-directory=~/.config/emacs";
-      emc = "emacsclient -c";
       #      ncg = "nix-collect-garbage --delete-old && sudo nix-collect-garbage -d && sudo /run/current-system/bin/switch-to-configuration boot";
       cat = "bat";
       man = "batman";
