@@ -57,6 +57,8 @@
       #inputs.nixpkgs.follows = "nixpkgs";
     };
 
+#    emacs-overlay.url = "github:nix-community/emacs-overlay";
+
   };
 
   outputs =
@@ -74,9 +76,10 @@
       unstablePkgs = import inputs.unstable {
         inherit system;
         config.allowUnfree = true;
-        # overlays = [
-        #   nix4vscode.overlays.forVscode
-        # ];
+        overlays = [
+          #   nix4vscode.overlays.forVscode
+ #          inputs.emacs-overlay.overlay
+        ];
       };
 
       stablePkgs = import inputs.stable {
