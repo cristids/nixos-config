@@ -26,7 +26,7 @@
         ms-python.flake8
         ms-python.mypy-type-checker
         ms-python.vscode-pylance
-        ms-python.pylint
+        #ms-python.pylint # pylint is throwing lots of errors
         charliermarsh.ruff
 
         #nix
