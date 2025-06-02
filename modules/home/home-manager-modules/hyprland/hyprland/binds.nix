@@ -5,7 +5,8 @@ in {
   wayland.windowManager.hyprland.settings = {
     bind = [
       "$modifier,Return,exec,${terminal}"
-      "$modifier,K,exec,list-keybinds"
+      "$modifier,K,exec,krusader"
+      "$modifier SHIFT,K,exec,list-keybinds"
       "$modifier SHIFT,Return,exec,rofi-launcher"
       "$modifier SHIFT,W,exec,web-search"
       "$modifier ALT,W,exec,wallsetter"
@@ -16,6 +17,7 @@ in {
       "$modifier SHIFT,E,exec,emopicker9000"
       "$modifier,S,exec,screenshootin"
       "$modifier,D,exec,dolphin"
+      "$modifier SHIFT,D,exec,doublecmd"
       "$modifier,P,exec,1password"
       "$modifier,V,exec,code"
       "$modifier,A,exec,azuredatastudio"

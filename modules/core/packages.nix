@@ -72,7 +72,9 @@
     lha # Tool For Handling .lha Files
     jq # jq is a lightweight and flexible command-line JSON processor
     lsof # lsof is a command that lists open files and the processes that opened them
+    doublecmd # Double Commander is a cross platform open source file manager with two panels side by side
 
+    
     wget
     # vscode
     # azuredatastudio

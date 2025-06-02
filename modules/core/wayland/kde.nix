@@ -65,16 +65,38 @@
     kdePackages.kwalletmanager # provides KCMs and stuff
     kdePackages.kalk
     kdePackages.kompare
+    kdePackages.kglobalaccel
+    kdePackages.kio
 
     krusader
     kdiff3
-    krename
+    # krename
 
     shared-mime-info
     
     maliit-keyboard
 
-    
+    # Application integration
+    kdePackages.libplasma # provides Kirigami platform theme
+    kdePackages.plasma-integration # provides Qt platform theme
+    kdePackages.kde-gtk-config # syncs KDE settings to GTK
+
+    # Artwork + themes
+    kdePackages.breeze
+    kdePackages.breeze-icons
+    kdePackages.breeze-gtk
+    kdePackages.ocean-sound-theme
+    kdePackages.plasma-workspace-wallpapers
+    hicolor-icon-theme # fallback icons
+    kdePackages.qqc2-breeze-style
+    kdePackages.qqc2-desktop-style
+
+    # misc Plasma extras
+    kdePackages.kdeplasma-addons
+    xdg-user-dirs
+
+    qt5.qttools
+   
   ];
 }
 
