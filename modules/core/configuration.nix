@@ -12,7 +12,7 @@
     ./networking.nix
     ./services.nix
     ./packages.nix
-    ./packages-unstable.nix
+    ./emacs.nix
     ./zsh.nix
     #./kde.nix
     ./fonts.nix

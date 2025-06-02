@@ -64,8 +64,11 @@
     kdePackages.kwallet-pam # provides helper service
     kdePackages.kwalletmanager # provides KCMs and stuff
     kdePackages.kalk
+    kdePackages.kompare
 
-
+    krusader
+    kdiff3
+    krename
 
     shared-mime-info
     

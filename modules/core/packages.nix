@@ -68,6 +68,10 @@
     v4l-utils # Used For Things Like OBS Virtual Camera
     wget # Tool For Fetching Files With Links
     yazi # TUI File Manager
+    zip # Tool For Handling .zip Files
+    lha # Tool For Handling .lha Files
+    jq # jq is a lightweight and flexible command-line JSON processor
+    lsof # lsof is a command that lists open files and the processes that opened them
 
     wget
     # vscode
