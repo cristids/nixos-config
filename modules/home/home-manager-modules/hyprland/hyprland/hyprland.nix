@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  stylixImage = ../../../../home/wallpapers/AnimeGirlNightSky.jpg;
+  stylixImage = "../../../../home/wallpapers/.Anime - Landscape.jpeg";
 in {
   home.packages = with pkgs; [
     brightnessctl
@@ -47,13 +47,13 @@ in {
         "dbus-update-activation-environment --all --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         "systemctl --user start hyprpolkitagent"
-        "killall -q swww;sleep .5 && swww init"
+        "killall -q swww;sleep .5 && swww-daemon"
         "killall -q waybar;sleep .5 && waybar"
         "killall -q swaync;sleep .5 && swaync"
         "nm-applet --indicator"
         "pypr &"
         "iio-sensor-proxy &"
-        "sleep 1.5 && swww img ${stylixImage}"
+        #"sleep 1.5 && swww img ${stylixImage}"
       ];
 
       input = {
