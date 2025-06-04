@@ -38,6 +38,7 @@
     ./zsh
     ./iiorient.nix
     ./iior.nix
+    ./syncthing.nix
   ];
   #    ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;
 }

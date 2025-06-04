@@ -36,6 +36,7 @@
   environment.systemPackages = with pkgs; [
     uwsm
     kitty
+    alacritty
     xdg-desktop-portal-hyprland
     networkmanagerapplet
     xdg-utils

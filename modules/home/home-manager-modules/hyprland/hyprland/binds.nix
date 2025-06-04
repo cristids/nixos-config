@@ -1,6 +1,6 @@
 {...}: let
   browser = "brave";
-  terminal = "kitty";
+  terminal = "alacritty";
 in {
   wayland.windowManager.hyprland.settings = {
     bind = [
@@ -24,7 +24,7 @@ in {
       "$modifier,O,exec,obs"
       "$modifier,C,exec,hyprpicker -a"
       "$modifier,G,exec,gimp"
-      "$modifier,T,exec,pypr toggle term"
+      "$modifier,T,exec,pypr toggle alacritty_term"
       "$modifier,F,fullscreen, 0" #fullscreen
       "$modifier,M,fullscreen, 1" #maximize
       "$modifier SHIFT,M,exec,pavucontrol"
