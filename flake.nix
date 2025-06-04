@@ -120,7 +120,7 @@
                   # nvchadModule = inputs.nix4nvchad.homeManagerModule;
                   # nvfpkgs = inputs.nvfpkgs;
                   # nixvim = inputs.nixvim;
-                  stylixModule = inputs.stylix.homeManagerModules.stylix;
+                  stylixModule = inputs.stylix.homeModules.stylix;
                   # nix4vscode = inputs.nix4vscode;
                   vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
                   inherit nixCats;
