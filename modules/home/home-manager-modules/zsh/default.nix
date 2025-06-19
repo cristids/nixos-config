@@ -35,10 +35,6 @@
         name = "zsh-completions";
         src = pkgs.zsh-completions;
       }
-      {
-        name = "zsh-history";
-        src = pkgs.zsh-history;
-      }
     ];
 
     # oh-my-zsh = {
