@@ -49,6 +49,7 @@
 
     onedrive.enable = true;
     tailscale.enable = true;
+    tailscale.useRoutingFeatures = "client";
     fprintd.enable = true;
 
     # Enable the X11 windowing system.
