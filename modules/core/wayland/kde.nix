@@ -67,6 +67,8 @@
     kdePackages.kompare
     kdePackages.kglobalaccel
     kdePackages.kio
+    kdePackages.krohnkite
+    kdePackages.dynamic-workspaces
 
     krusader
     kdiff3
@@ -96,6 +98,8 @@
     xdg-user-dirs
 
     qt5.qttools
+    polonium
+    kde-rounded-corners
    
   ];
 }

@@ -59,7 +59,7 @@
     mpv # Incredible Video Player
     nixfmt-rfc-style # Nix Formatter
     pciutils # Collection Of Tools For Inspecting PCI Devices
-    rhythmbox
+    #rhythmbox
     ripgrep # Improved Grep
     socat # Needed For Screenshots
     unrar # Tool For Handling .rar Files
@@ -94,5 +94,7 @@
     tlrc
     hplip
     hplipWithPlugin
+
+    pkgs.zed-editor
   ];
 }

@@ -1,7 +1,7 @@
 { pkgs, unstablePkgs, ... }:
 {
 
-  programs.nix-ld.enable = true;
+  #programs.nix-ld.enable = true;
 
   environment.systemPackages = with unstablePkgs; [
     git
