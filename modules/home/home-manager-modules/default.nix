@@ -28,6 +28,7 @@
     ./nh.nix
     # ./nvf.nix
     ./kanshi.nix
+    ./ollama.nix
     ./stylix.nix
     #./starship.nix
     ./ohmyposh
