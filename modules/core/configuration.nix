@@ -20,6 +20,7 @@
     #./kde-unstable.nix
     #./hyprland.nix
     #./cosmic.nix
+    ./podman.nix
   ];
 
   nix.settings.download-buffer-size = 536870912; # 512 MiB;
