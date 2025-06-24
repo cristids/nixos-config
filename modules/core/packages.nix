@@ -97,6 +97,5 @@
 
     zed-editor
     aider-chat
-
   ];
 }
