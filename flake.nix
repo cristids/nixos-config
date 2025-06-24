@@ -59,6 +59,8 @@
 
 #    emacs-overlay.url = "github:nix-community/emacs-overlay";
 
+    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
+
   };
 
   outputs =
@@ -76,10 +78,10 @@
       unstablePkgs = import inputs.unstable {
         inherit system;
         config.allowUnfree = true;
-        overlays = [
-          #   nix4vscode.overlays.forVscode
- #          inputs.emacs-overlay.overlay
-        ];
+ #        overlays = [
+ #          #   nix4vscode.overlays.forVscode
+ # #          inputs.emacs-overlay.overlay
+ #        ];
       };
 
       stablePkgs = import inputs.stable {
@@ -124,6 +126,7 @@
                   # nix4vscode = inputs.nix4vscode;
                   vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
                   inherit nixCats;
+                  quadletModule = inputs.quadlet-nix.homeManagerModules.quadlet;
                 };
               }
             ];
