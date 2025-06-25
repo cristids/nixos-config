@@ -21,6 +21,7 @@
     #./hyprland.nix
     #./cosmic.nix
     ./podman.nix
+    ./postgresql.nix
   ];
 
   nix.settings.download-buffer-size = 536870912; # 512 MiB;
