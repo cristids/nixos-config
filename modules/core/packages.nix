@@ -95,6 +95,7 @@
     hplip
     hplipWithPlugin
 
-    pkgs.zed-editor
+    zed-editor
+    aider-chat
   ];
 }

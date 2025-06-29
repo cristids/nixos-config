@@ -85,7 +85,11 @@
       if [ -f $HOME/.zshrc-personal ]; then
         source $HOME/.zshrc-personal
       fi
-      export PATH="$HOME/.config/emacs/bin:$PATH"
+
+      # Create ~/.local/bin if it doesn't exist
+      [ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin"
+
+      export PATH="$HOME/.config/emacs/bin:$HOME/.local/bin:$PATH"
     '';
 
     shellAliases = {
@@ -100,6 +104,7 @@
       ll = "eza --icons -lh --group-directories-first -1 --no-user --long";
       la = "eza --icons -lah --group-directories-first -1";
       tree = "eza --icons --tree --group-directories-first";
+      cursor="$HOME/.local/bin/Cursor.AppImage";
     };
   };
 }

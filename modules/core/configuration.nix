@@ -20,6 +20,8 @@
     #./kde-unstable.nix
     #./hyprland.nix
     #./cosmic.nix
+    ./podman.nix
+    ./postgresql.nix
   ];
 
   nix.settings.download-buffer-size = 536870912; # 512 MiB;
@@ -90,6 +92,7 @@
     pam.services.swaylock = {
       text = ''auth include login '';
     };
+
   };
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.cristian = {

@@ -1,6 +1,6 @@
 {...}: let
   browser = "brave";
-  terminal = "alacritty";
+  terminal = "ghostty";
 in {
   wayland.windowManager.hyprland.settings = {
     bind = [
@@ -19,6 +19,7 @@ in {
       "$modifier,D,exec,dolphin"
       "$modifier SHIFT,D,exec,doublecmd"
       "$modifier,P,exec,1password"
+      "$modifier SHIFT,V,exec,$HOME/.local/bin/Cursor.AppImage"
       "$modifier,V,exec,code"
       "$modifier,A,exec,azuredatastudio"
       "$modifier,O,exec,obs"
