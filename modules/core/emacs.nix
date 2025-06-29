@@ -15,8 +15,8 @@
     nodejs # provides npm
     isort
     pipenv
-    rust-analyzer
-    rustc
+    #rust-analyzer
+    #rustc
     cargo
     gcc
     glibc

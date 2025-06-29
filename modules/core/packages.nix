@@ -97,5 +97,7 @@
 
     zed-editor
     aider-chat
+
+    rustup
   ];
 }

@@ -20,7 +20,7 @@
     #./kde-unstable.nix
     #./hyprland.nix
     #./cosmic.nix
-    ./podman.nix
+    #./podman.nix
     ./postgresql.nix
   ];
 
