@@ -32,6 +32,10 @@
         #nix
         jnoortheen.nix-ide
         #oops418.nix-env-picker
+
+        #rust
+        rust-lang.rust-analyzer
+
       ])
       ++ (with vscode_exts; [
       #   #sql server

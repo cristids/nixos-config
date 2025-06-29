@@ -59,7 +59,7 @@
 
 #    emacs-overlay.url = "github:nix-community/emacs-overlay";
 
-    quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
+    #quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
 
   };
 
@@ -126,7 +126,7 @@
                   # nix4vscode = inputs.nix4vscode;
                   vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
                   inherit nixCats;
-                  quadletModule = inputs.quadlet-nix.homeManagerModules.quadlet;
+                  #quadletModule = inputs.quadlet-nix.homeManagerModules.quadlet;
                 };
               }
             ];
