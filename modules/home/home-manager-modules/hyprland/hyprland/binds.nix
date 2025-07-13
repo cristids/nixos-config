@@ -1,6 +1,6 @@
 {...}: let
   browser = "brave";
-  terminal = "ghostty";
+  terminal = "kitty";
 in {
   wayland.windowManager.hyprland.settings = {
     bind = [

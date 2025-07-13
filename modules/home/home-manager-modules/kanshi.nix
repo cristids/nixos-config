@@ -1,6 +1,6 @@
 {...}: {
   services.kanshi = {
-    enable = true;
+    enable = false;
     systemdTarget = "hyprland-session.target";
 
     settings = [

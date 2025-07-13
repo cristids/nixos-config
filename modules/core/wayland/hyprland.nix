@@ -8,7 +8,7 @@
     portalPackage = pkgs.xdg-desktop-portal-hyprland;
     withUWSM = true;
   };
-  programs.iio-hyprland.enable = true;
+  #programs.iio-hyprland.enable = true;
   services.hypridle.enable = true;
   programs.hyprlock.enable = true;
 
