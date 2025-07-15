@@ -178,7 +178,7 @@ in {
     extraConfig = "
 #      source = ~/.config/hypr/monitors.conf
        monitor=eDP-1,preferred,auto,1.6
-       monitor=eDP-1,transform,3
+       #monitor=eDP-1,transform,3
        workspace=edp-1,1
        monitor=,preferred,auto,auto
     ";
