@@ -141,11 +141,12 @@ in {
         no_warps = true;
       };
 
-      render = {
-        explicit_sync = 1; # Change to 1 to disable
-        explicit_sync_kms = 1;
-        direct_scanout = 0;
-      };
+      #These were obsoleted in 0.50
+      #render = {
+      #  explicit_sync = 1; # Change to 1 to disable
+      #  explicit_sync_kms = 1;
+      #  direct_scanout = 0;
+      #};
 
       master = {
         new_status = "master";
