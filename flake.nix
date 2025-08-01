@@ -57,9 +57,25 @@
       #inputs.nixpkgs.follows = "nixpkgs";
     };
 
-#    emacs-overlay.url = "github:nix-community/emacs-overlay";
+    #    emacs-overlay.url = "github:nix-community/emacs-overlay";
 
     #quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
+    #
+
+    caelestia.url = "github:caelestia-dots/shell";
+    caelestia.inputs.nixpkgs.follows = "nixpkgs";
+    #
+    # caelestia-shell = {
+    #   url = "github:miliu2cc/caelestia-shell-nixos";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    #caelestia-shell.url = "github:caelestia-dots/shell";
+    #
+
+    #quickshell = {
+    #  url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+    #  inputs.nixpkgs.follows = "nixpkgs";
+    #};
 
   };
 
@@ -78,10 +94,10 @@
       unstablePkgs = import inputs.unstable {
         inherit system;
         config.allowUnfree = true;
- #        overlays = [
- #          #   nix4vscode.overlays.forVscode
- # #          inputs.emacs-overlay.overlay
- #        ];
+        #        overlays = [
+        #          #   nix4vscode.overlays.forVscode
+        # #          inputs.emacs-overlay.overlay
+        #        ];
       };
 
       stablePkgs = import inputs.stable {
@@ -127,7 +143,14 @@
                   vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
                   inherit nixCats;
                   #quadletModule = inputs.quadlet-nix.homeManagerModules.quadlet;
+                  inherit (inputs) caelestia;
+                  # quickshell = inputs.quickshell.packages.${system}.default.override {
+                  #   withX11 = false;
+                  #   withI3 = false;
+                  # };
+
                 };
+
               }
             ];
         };

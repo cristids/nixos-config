@@ -100,5 +100,7 @@
     rustup
 
     lmstudio
+    claude-code
+    windsurf
   ];
 }

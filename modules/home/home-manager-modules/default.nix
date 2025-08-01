@@ -4,7 +4,8 @@
   lib,
   vars,
   ...
-}: {
+}:
+{
   imports = [
     ./packages.nix
     ./packages-unstable.nix
@@ -42,6 +43,5 @@
     #./iior.nix
     ./syncthing.nix
   ]
-      ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix
-  ;
+  ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;
 }

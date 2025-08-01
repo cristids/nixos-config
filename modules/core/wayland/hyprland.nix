@@ -2,7 +2,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   programs.hyprland = {
     enable = true;
     portalPackage = pkgs.xdg-desktop-portal-hyprland;
@@ -26,8 +27,8 @@
     #};
     portal = {
       enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-hyprland];
-      configPackages = [pkgs.hyprland];
+      extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
+      configPackages = [ pkgs.hyprland ];
     };
   };
 
@@ -40,5 +41,6 @@
     xdg-desktop-portal-hyprland
     networkmanagerapplet
     xdg-utils
+    libsForQt5.qt5ct
   ];
 }
