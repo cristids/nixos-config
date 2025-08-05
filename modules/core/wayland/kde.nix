@@ -1,35 +1,12 @@
 {
   pkgs,
   config,
+  lib,
   ...
 }:
 {
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-    theme = "breeze";
-  };
 
-  # security.pam.services = {
-  #   sddm.kwallet = {
-  #     enable = true;
-  #     # enableKwallet = true;
-  #     # package = pkgs.kdePackages.kwallet-pam;
-  #   };
-  #   login.kwallet = {
-  #     enable = true;
-  #     # package = pkgs.kdePackages.kwallet-pam;
-  #   };
-  #   kde = {
-  #     # allowNullPassword = true;
-  #     kwallet = {
-  #       enable = true;
-  #       # package = pkgs.kdePackages.kwallet-pam;
-  #     };
-  #   };
-  # };
-  # security.pam.services.login.enableKwallet = true;
+  services.xserver.enable = false;
 
   services.desktopManager.plasma6 = {
     enable = true;
@@ -100,6 +77,5 @@
     qt5.qttools
     polonium
     kde-rounded-corners
-
   ];
 }

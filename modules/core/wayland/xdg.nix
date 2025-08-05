@@ -15,13 +15,15 @@
 
     portal = {
       enable = true;
-      wlr.enable = true;
+      wlr.enable = true; # Enable wlr portal for wlroots-based compositors like Niri
       extraPortals = [
         pkgs.xdg-desktop-portal-wlr # For Niri
-        #pkgs.xdg-desktop-portal-gnome
         pkgs.xdg-desktop-portal-hyprland # For Hyprland
-        pkgs.kdePackages.xdg-desktop-portal-kde # For Plasma
+        pkgs.kdePackages.xdg-desktop-portal-kde # For KDE
+        pkgs.xdg-desktop-portal-gtk
+        pkgs.xdg-desktop-portal-gnome
       ];
+      xdgOpenUsePortal = true;
     };
   };
 
@@ -30,6 +32,13 @@
   environment.systemPackages = with pkgs; [
     xdg-utils
     xdg-user-dirs
+    # Portal packages needed for screen capture
+    #xdg-desktop-portal # Base portal service
+    #xdg-desktop-portal-gtk
+    #xdg-desktop-portal-gnome
+    #xdg-desktop-portal-wlr
+    #xdg-desktop-portal-hyprland
+    #kdePackages.xdg-desktop-portal-kde
   ];
 
 }

@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -13,6 +14,11 @@
   programs.hyprlock.enable = true;
 
   programs.uwsm.enable = true;
+  #programs.uwsm.waylandCompositors.hyprland = {
+  #  prettyName = "Hyprland";
+  #  comment = "Hyprland compositor managed by UWSM";
+  #  binPath = "/run/current-system/sw/bin/Hyprland";
+  #};
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

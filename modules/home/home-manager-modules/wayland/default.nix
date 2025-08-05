@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./xdg.nix
     ./hyprland
     ./niri
     ./packages.nix

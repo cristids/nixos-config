@@ -1,4 +1,5 @@
-{host, ...}: {
+{ host, ... }:
+{
   imports = [
     ./animations-dynamic.nix
     ./binds.nix

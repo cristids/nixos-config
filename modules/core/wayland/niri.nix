@@ -4,6 +4,7 @@
 {
   pkgs,
   inputs,
+  lib,
   ...
 }:
 
@@ -20,18 +21,18 @@
     enable = true;
     #package = inputs.niri.packages.${pkgs.system}.niri-unstable;
     #package = pkgs.niri-stable; #package from overlay above
-    package = pkgs.niri-unstable; # package from overlay above
+    package = pkgs.niri-stable; # package from overlay above
   };
 
   #systemd.user.targets.niri-session.wants = [ "xdg-desktop-autostart.target" ];
-  systemd.user.targets."niri-session" = {
-    description = "User target for Niri session";
-    wants = [
-      "xdg-desktop-portal-wlr.service"
-      "xdg-desktop-autostart.target"
-    ];
-    after = [ "graphical-session.target" ];
-  };
+  # systemd.user.targets."niri-session" = {
+  #   description = "User target for Niri session";
+  #   wants = [
+  #     "xdg-desktop-portal-wlr.service"
+  #     "xdg-desktop-autostart.target"
+  #   ];
+  #   after = [ "graphical-session.target" ];
+  # };
 
   services.dbus.packages = [ pkgs.nautilus ];
 
@@ -44,5 +45,8 @@
     cage
     gamescope
     xwayland-satellite-unstable
+    alacritty
+    networkmanagerapplet
+    libsForQt5.qt5ct
   ];
 }
