@@ -14,12 +14,8 @@
     ./packages.nix
     ./emacs.nix
     ./zsh.nix
-    #./kde.nix
     ./fonts.nix
     ./wayland
-    #./kde-unstable.nix
-    #./hyprland.nix
-    #./cosmic.nix
     #./podman.nix
     ./postgresql.nix
   ];

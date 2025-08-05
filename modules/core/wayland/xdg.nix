@@ -7,7 +7,6 @@
 
 {
   xdg = {
-    enable = true;
     autostart.enable = true;
     mime.enable = true;
     menus.enable = true;
@@ -16,10 +15,12 @@
 
     portal = {
       enable = true;
+      wlr.enable = true;
       extraPortals = [
-        pkgs.xdg-desktop-portal-hyprland # For Hyprland
         pkgs.xdg-desktop-portal-wlr # For Niri
-        pkgs.xdg-desktop-portal-kde # For Plasma
+        #pkgs.xdg-desktop-portal-gnome
+        pkgs.xdg-desktop-portal-hyprland # For Hyprland
+        pkgs.kdePackages.xdg-desktop-portal-kde # For Plasma
       ];
     };
   };
@@ -28,6 +29,7 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     xdg-utils
+    xdg-user-dirs
   ];
 
 }

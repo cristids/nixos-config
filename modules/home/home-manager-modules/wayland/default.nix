@@ -1,6 +1,8 @@
-{...}: {
+{ ... }:
+{
   imports = [
     ./hyprland
+    ./niri
     ./packages.nix
     ./rofi
     ./scripts

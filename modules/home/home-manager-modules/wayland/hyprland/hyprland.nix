@@ -39,9 +39,9 @@ in
       enableXdgAutostart = true;
       variables = [ "--all" ];
     };
-    xwayland = {
-      enable = true;
-    };
+    # xwayland = {
+    #   enable = true;
+    # };
     settings = {
       exec-once = [
         "${pkgs.kdePackages.kwallet-pam}/libexec/pam_kwallet_init"
@@ -159,6 +159,7 @@ in
 
       env = [
         "NIXOS_OZONE_WL, 1"
+        "ELECTRON_OZONE_PLATFORM_HINT, auto"
         "NIXPKGS_ALLOW_UNFREE, 1"
         "XDG_MENU_PREFIX,plasma-"
         "XDG_CURRENT_DESKTOP, Hyprland"

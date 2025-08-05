@@ -4,7 +4,8 @@
   lib,
   unstablePkgs,
   ...
-}: let
+}:
+let
   inherit (unstablePkgs) kdePackages maliit-keyboard;
 
   myKdePkgs = with kdePackages; [
@@ -76,7 +77,6 @@
 
     # misc Plasma extras
     kdeplasma-addons
-    pkgs.xdg-user-dirs # recommended upstream
 
     # Plasma utilities
     kmenuedit
@@ -105,7 +105,8 @@
     krdp
     xwaylandvideobridge # exposes Wayland windows to X11 screen capture
   ];
-in {
+in
+{
   disabledModules = [
     "services/desktop-managers/plasma6.nix"
     "services/display-managers/sddm.nix"
@@ -131,9 +132,7 @@ in {
 
   nixpkgs.config.allowUnfree = true;
 
-  environment.systemPackages =
-    myKdePkgs
-    ++ [
-      maliit-keyboard
-    ];
+  environment.systemPackages = myKdePkgs ++ [
+    maliit-keyboard
+  ];
 }

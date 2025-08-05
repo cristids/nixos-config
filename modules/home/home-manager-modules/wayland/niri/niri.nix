@@ -19,14 +19,124 @@
 
   home.packages = with pkgs; [
     wl-clipboard
+    mako
+    libnotify
   ];
 
-  programs.waybar.systemd.enable = true;
+  programs.alacritty = {
+    enable = true;
+    settings = {
+      window.decorations = "None";
+    };
+  };
+
+  # programs.kitty = {
+  #   enable = true;
+  #   settings = {
+  #     window_border_width = "0px";
+  #     tab_bar_edge = "top";
+  #     tab_bar_margin_width = "0.0";
+  #     tab_bar_style = "fade";
+  #     placement_strategy = "top-left";
+  #     hide_window_decorations = true;
+  #   };
+  # };
+
+  programs.fuzzel = {
+    settings.main.launch-prefix = "niri msg action spawn --";
+    settings.main.terminal = "foot";
+  };
+
+  # services.mako = {
+  #   enable = true;
+  #   borderRadius = 8;
+  #   format = "%a\n%s\n%b";
+  # };
+
+  #programs.waybar.systemd.enable = true;
   systemd.user.services."waybar".Service.ExecReload = lib.mkForce "";
 
   programs.niri.settings = {
-    prefer-no-csd = true;
-    layout.shadow.enable = true;
+    prefer-no-csd = true; # disable windows decorations
+
+    layout = {
+      gaps = 16;
+      struts.left = 64;
+      struts.right = 64;
+      border.width = 4;
+      always-center-single-column = true;
+
+      empty-workspace-above-first = true;
+
+      # fog of war
+      # focus-ring = {
+      #   # enable = true;
+      #   width = 10000;
+      #   active.color = "#00000055";
+      # };
+      border.active.gradient = {
+        from = "red";
+        to = "blue";
+        in' = "oklch shorter hue";
+      };
+
+      shadow.enable = true;
+
+      # default-column-display = "tabbed";
+
+      tab-indicator = {
+        position = "top";
+        gaps-between-tabs = 10;
+
+        # hide-when-single-tab = true;
+        # place-within-column = true;
+
+        # active.color = "red";
+      };
+    };
+
+    #hotkey-overlay.skip-at-startup = !nixosConfig.is-virtual-machine;
+    clipboard.disable-primary = true;
+
+    overview.zoom = 0.5;
+
+    screenshot-path = "~/Pictures/Screenshots/%Y-%m-%dT%H:%M:%S.png";
+
+    switch-events =
+      with config.lib.niri.actions;
+      let
+        sh = spawn "sh" "-c";
+      in
+      {
+        tablet-mode-on.action = sh "notify-send tablet-mode-on";
+        tablet-mode-off.action = sh "notify-send tablet-mode-off";
+        lid-open.action = sh "notify-send lid-open";
+        lid-close.action = sh "notify-send lid-close";
+      };
+
+    environment = {
+      #XDG_CURRENT_DESKTOP = "niri";
+      #XDG_SESSION_DESKTOP = "niri";
+      #XDG_SESSION_TYPE = "wayland";
+      NIXOS_OZONE_WL = "1";
+      ELECTRON_OZONE_PLATFORM_HINT = "auto";
+      MOZ_ENABLE_WAYLAND = "1";
+      NIXPKGS_ALLOW_UNFREE = "1";
+      XDG_MENU_PREFIX = "plasma-";
+      GDK_BACKEND = "wayland, x11";
+      CLUTTER_BACKEND = "wayland";
+      QT_QPA_PLATFORM = "wayland";
+      QT_QPA_PLATFORMTHEME = "qt5ct";
+      QT_STYLE_OVERRIDE = "Breeze";
+      QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+      QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+      SDL_VIDEODRIVER = "x11";
+      AQ_DRM_DEVICES = "/dev/dri/card0:/dev/dri/card1";
+      GDK_SCALE = "1";
+      QT_SCALE_FACTOR = "1";
+      EDITOR = "nvim";
+    };
+
     input = {
       focus-follows-mouse = {
         enable = true;
@@ -35,6 +145,14 @@
       keyboard.xkb = with nixosConfig.services.xserver.xkb; {
         inherit variant layout options;
       };
+      touchpad = {
+        tap = true;
+        dwt = true;
+        natural-scroll = true;
+        click-method = "clickfinger";
+      };
+      tablet.map-to-output = "eDP-1";
+      touch.map-to-output = "eDP-1";
     };
     window-rules = [
       {
@@ -53,7 +171,7 @@
       {
         "${mod}+Shift+Slash".action = show-hotkey-overlay;
         "${mod}+D".action = spawn "fuzzel";
-        "${mod}+Return".action = spawn "kitty";
+        "${mod}+Return".action = spawn "alacritty";
         "Super+Alt+L".action =
           spawn "sh" "-c"
             "loginctl lock-session && sleep 5 && niri msg action power-off-monitors";

@@ -1,7 +1,7 @@
 {
   pkgs,
   inputs,
-  caelestia,
+  #caelestia,
   ...
 }:
 {
@@ -19,20 +19,20 @@
 
     #quickshell
     #quickshell.packages.${pkgs.system}.default
-    caelestia.packages.${pkgs.system}.default
+    #caelestia.packages.${pkgs.system}.default
     fish
     jq
     fd
-    (pkgs.python3.withPackages (
-      python-pkgs: with python-pkgs; [
-        aubio
-        pyaudio
-        numpy
-      ]
-    ))
-    cava
-    bluez
-    ddcutil
+    #(pkgs.python3.withPackages (
+    #  python-pkgs: with python-pkgs; [
+    #    aubio
+    #    pyaudio
+    #    numpy
+    #  ]
+    #))
+    #cava
+    #bluez
+    #ddcutil
     brightnessctl
     curl
     material-symbols

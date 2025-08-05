@@ -20,7 +20,7 @@
     ./git.nix
     ./gtk.nix
     ./htop.nix
-    ./hyprland
+    ./wayland
     ./helix.nix
     ./kitty.nix
     # ./nixvim.nix
@@ -36,7 +36,6 @@
     ./ohmyposh
     ./vscode.nix
     ./wezterm.nix
-    ./xdg.nix
     ./zoxide.nix
     ./zsh
     #./iiorient.nix

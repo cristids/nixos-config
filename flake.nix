@@ -62,8 +62,8 @@
     #quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
     #
 
-    caelestia.url = "github:caelestia-dots/shell";
-    caelestia.inputs.nixpkgs.follows = "nixpkgs";
+    #caelestia.url = "github:caelestia-dots/shell";
+    #caelestia.inputs.nixpkgs.follows = "nixpkgs";
     #
     # caelestia-shell = {
     #   url = "github:miliu2cc/caelestia-shell-nixos";
@@ -76,6 +76,8 @@
     #  url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
     #  inputs.nixpkgs.follows = "nixpkgs";
     #};
+
+    niri.url = "github:sodiboo/niri-flake";
 
   };
 
@@ -143,12 +145,12 @@
                   vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
                   inherit nixCats;
                   #quadletModule = inputs.quadlet-nix.homeManagerModules.quadlet;
-                  inherit (inputs) caelestia;
+                  #inherit (inputs) caelestia;
                   # quickshell = inputs.quickshell.packages.${system}.default.override {
                   #   withX11 = false;
                   #   withI3 = false;
                   # };
-
+                  #inherit (inputs) niri;
                 };
 
               }

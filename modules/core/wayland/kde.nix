@@ -96,7 +96,6 @@
 
     # misc Plasma extras
     kdePackages.kdeplasma-addons
-    xdg-user-dirs
 
     qt5.qttools
     polonium

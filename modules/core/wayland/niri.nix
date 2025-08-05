@@ -23,9 +23,19 @@
     package = pkgs.niri-unstable; # package from overlay above
   };
 
+  #systemd.user.targets.niri-session.wants = [ "xdg-desktop-autostart.target" ];
+  systemd.user.targets."niri-session" = {
+    description = "User target for Niri session";
+    wants = [
+      "xdg-desktop-portal-wlr.service"
+      "xdg-desktop-autostart.target"
+    ];
+    after = [ "graphical-session.target" ];
+  };
+
   services.dbus.packages = [ pkgs.nautilus ];
 
-  environment.variables.NIXOS_OZONE_WL = "1";
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   environment.systemPackages = with pkgs; [
     wl-clipboard
