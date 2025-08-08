@@ -8,7 +8,7 @@
   # Enable SDDM
   services.displayManager.sddm = {
     enable = true;
-    wayland.enable = true;
-    theme = "breeze";
+    #wayland.enable = true;
+    #theme = "breeze";
   };
 }

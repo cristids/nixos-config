@@ -15,11 +15,9 @@
   #_.persist.allUsers.directories = [ ".local/state/wireplumber" ];
   #_.persist.users.cristian.files = [ ".cache/fuzzel" ];
 
-  services.swaync.enable = true;
-
   home.packages = with pkgs; [
     wl-clipboard
-    mako
+    #mako
     libnotify
   ];
 

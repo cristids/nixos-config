@@ -49,8 +49,11 @@
     # gnome.gnome-keyring.enable = true;
 
     dbus.implementation = "broker";
+    dbus.enable = true;
 
-    onedrive.enable = true;
+    xserver.enable = false;
+
+    onedrive.enable = false;
     tailscale.enable = true;
     tailscale.useRoutingFeatures = "client";
     fprintd.enable = true;

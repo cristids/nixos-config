@@ -5,9 +5,6 @@
   ...
 }:
 {
-
-  services.xserver.enable = false;
-
   services.desktopManager.plasma6 = {
     enable = true;
   };
@@ -16,7 +13,7 @@
 
   environment.systemPackages = with pkgs; [
     kdePackages.kate
-    kdePackages.sddm-kcm
+    #kdePackages.sddm-kcm
     kdePackages.kcmutils
     kdePackages.plymouth-kcm
     kdePackages.kdeplasma-addons
