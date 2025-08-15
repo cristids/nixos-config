@@ -22,6 +22,7 @@
         pkgs.kdePackages.xdg-desktop-portal-kde # For KDE
         pkgs.xdg-desktop-portal-gtk
         pkgs.xdg-desktop-portal-gnome
+        pkgs.xdg-desktop-portal-cosmic
       ];
       xdgOpenUsePortal = true;
     };

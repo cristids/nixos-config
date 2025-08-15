@@ -111,6 +111,7 @@
         ./modules/core/configuration.nix
         home-manager.nixosModules.home-manager
         #stylix.homeManagerModules.stylix
+
       ];
 
       lastModified = toString self.lastModified;

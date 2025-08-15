@@ -1,7 +1,7 @@
-{pkgs, ...}:
+{ pkgs, ... }:
 {
   services.desktopManager.cosmic.enable = true;
-  services.displayManager.cosmic-greeter.enable = true;
+  # services.displayManager.cosmic-greeter.enable = true;
 
   environment.systemPackages = with pkgs; [
     cosmic-bg
@@ -32,7 +32,6 @@
     cosmic-ext-calculator
     cosmic-settings-daemon
     cosmic-workspaces-epoch
-    xdg-desktop-portal-cosmic
     tasks
 
   ];

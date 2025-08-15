@@ -17,7 +17,7 @@
     pipenv
     #rust-analyzer
     #rustc
-    cargo
+    #cargo
     gcc
     glibc
     glibc.dev
@@ -30,6 +30,8 @@
     sqlite
     ispell
     source-code-pro
+    gdb
+    lldb
   ];
 
   services.emacs = {
