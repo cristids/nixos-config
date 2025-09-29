@@ -35,10 +35,10 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    nixCats = {
-      url = "github:cristids/nixcats"; # if not pulled ok do : nix flake update nixCats  before rebuilding
-      #url = "path:/home/cristian/cristids/nixcats";
-    };
+    # nixCats = {
+    #   url = "github:cristids/nixcats"; # if not pulled ok do : nix flake update nixCats  before rebuilding
+    #   #url = "path:/home/cristian/cristids/nixcats";
+    # };
 
     stylix = {
       url = "github:danth/stylix";
@@ -86,7 +86,7 @@
       self,
       nixpkgs,
       home-manager,
-      nixCats,
+      #nixCats,
       # nix4vscode,
       #stylix,
       ...
@@ -144,7 +144,7 @@
                   stylixModule = inputs.stylix.homeModules.stylix;
                   # nix4vscode = inputs.nix4vscode;
                   vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
-                  inherit nixCats;
+                  #inherit nixCats;
                   #quadletModule = inputs.quadlet-nix.homeManagerModules.quadlet;
                   #inherit (inputs) caelestia;
                   # quickshell = inputs.quickshell.packages.${system}.default.override {

@@ -102,5 +102,7 @@
     lmstudio
     claude-code
     windsurf
+
+    mullvad-browser
   ];
 }

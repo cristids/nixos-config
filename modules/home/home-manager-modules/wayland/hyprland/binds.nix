@@ -1,7 +1,9 @@
-{...}: let
-  browser = "brave";
-  terminal = "kitty";
-in {
+{ ... }:
+let
+  browser = "mullvad-browser";
+  terminal = "ghostty";
+in
+{
   wayland.windowManager.hyprland.settings = {
     bind = [
       "$modifier,Return,exec,${terminal}"
@@ -26,8 +28,8 @@ in {
       "$modifier,C,exec,hyprpicker -a"
       "$modifier,G,exec,gimp"
       "$modifier,T,exec,pypr toggle alacritty_term"
-      "$modifier,F,fullscreen, 0" #fullscreen
-      "$modifier,M,fullscreen, 1" #maximize
+      "$modifier,F,fullscreen, 0" # fullscreen
+      "$modifier,M,fullscreen, 1" # maximize
       "$modifier SHIFT,M,exec,pavucontrol"
       "$modifier,Q,killactive,"
       "$modifier,L,exec, hyprlock"

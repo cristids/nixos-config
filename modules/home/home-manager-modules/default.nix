@@ -25,7 +25,7 @@
     ./kitty.nix
     # ./nixvim.nix
     # ./nvchad.nix
-    # ./neovim.nix
+    ./neovim.nix
     ./nh.nix
     # ./nvf.nix
     ./kanshi.nix

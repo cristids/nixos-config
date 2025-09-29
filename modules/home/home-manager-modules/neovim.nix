@@ -1,13 +1,26 @@
-{...}:
+{ pkgs, ... }:
 {
   programs.neovim = {
-    enable = false;
-    defaultEditor = true;
+    enable = true;
     viAlias = true;
     vimAlias = true;
-    # extraConfig = ''
-    #   set number relativenumber
-    # '';
+    withPython3 = true;
+    withNodeJs = true;
+    extraPackages = with pkgs; [
+      ripgrep
+      fd
+      tree-sitter
+      gcc
+      clang
+      unzip
+      git
+      curl
+      wget
+      nodejs
+      python3
+    ];
   };
-  # environment.variables.EDITOR = "nvim";
+
+  # Optional: make Mason-installed tools easy to use
+  home.sessionPath = [ "$HOME/.local/share/nvim/mason/bin" ];
 }

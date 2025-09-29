@@ -25,7 +25,7 @@
 in {
   home.packages = with unstable; [
     _1password-gui
-    affine
+    #affine #disabled because it requires electron which is now insecure
     #azuredatastudio
     customCursor
     customAzureDataStudio
