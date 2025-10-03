@@ -103,6 +103,10 @@
     claude-code
     windsurf
 
-    mullvad-browser
+    protonvpn-gui
+    #nautilus
+    #kdePackages.dolphin
+    #mullvad-browser
+    #mullvad-vpn
   ];
 }

@@ -4,9 +4,9 @@
     ./sddm.nix
     ./xdg.nix
     ./kde.nix
-    ./sway.nix
+    #./sway.nix
     ./hyprland.nix
-    ./niri.nix
+    #./niri.nix
     #./gnome.nix
     ./cosmic.nix
   ];

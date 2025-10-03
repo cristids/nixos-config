@@ -3,7 +3,7 @@
   imports = [
     ./xdg.nix
     ./hyprland
-    ./niri
+    #    ./niri
     ./packages.nix
     ./rofi
     ./scripts
