@@ -34,8 +34,8 @@
     lldb
   ];
 
-  services.emacs = {
-    enable = true;
-    package = unstablePkgs.emacs-pgtk; # replace with emacs-gtk, or a version provided by the community overlay if desired.
-  };
+  # services.emacs = {
+  #   enable = true;
+  #   package = unstablePkgs.emacs-pgtk; # replace with emacs-gtk, or a version provided by the community overlay if desired.
+  # };
 }

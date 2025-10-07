@@ -31,7 +31,7 @@
     ./kanshi.nix
     ./ollama.nix
     #./quadlet.nix #implements podman container for rootless mode
-    ./stylix.nix
+    #./stylix.nix
     #./starship.nix
     ./ohmyposh
     ./vscode.nix

@@ -40,11 +40,11 @@
     #   #url = "path:/home/cristian/cristids/nixcats";
     # };
 
-    stylix = {
-      url = "github:danth/stylix";
-      #url = "github:danth/stylix/release-24.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    #stylix = {
+    #  url = "github:danth/stylix";
+    #  #url = "github:danth/stylix/release-24.11";
+    #  inputs.nixpkgs.follows = "nixpkgs";
+    #};
 
     # nix4vscode = {
     #   url = "github:nix-community/nix4vscode";
@@ -52,10 +52,10 @@
     # };
 
     # This flake adds mssql and sqltools extensions to the vscode
-    nix-vscode-extensions = {
-      url = "github:nix-community/nix-vscode-extensions/00e11463876a04a77fb97ba50c015ab9e5bee90d";
-      #inputs.nixpkgs.follows = "nixpkgs";
-    };
+    #nix-vscode-extensions = {
+    #  url = "github:nix-community/nix-vscode-extensions/00e11463876a04a77fb97ba50c015ab9e5bee90d";
+    #  #inputs.nixpkgs.follows = "nixpkgs";
+    #};
 
     #    emacs-overlay.url = "github:nix-community/emacs-overlay";
 
@@ -77,7 +77,7 @@
     #  inputs.nixpkgs.follows = "nixpkgs";
     #};
 
-    niri.url = "github:sodiboo/niri-flake";
+    #niri.url = "github:sodiboo/niri-flake";
 
   };
 
@@ -129,6 +129,7 @@
             ++ [
               {
                 networking.hostName = name;
+                nixpkgs.config.allowUnfree = true;
 
                 home-manager.useGlobalPkgs = true;
                 home-manager.useUserPackages = true;
@@ -141,9 +142,9 @@
                   # nvchadModule = inputs.nix4nvchad.homeManagerModule;
                   # nvfpkgs = inputs.nvfpkgs;
                   # nixvim = inputs.nixvim;
-                  stylixModule = inputs.stylix.homeModules.stylix;
+                  #stylixModule = inputs.stylix.homeModules.stylix;
                   # nix4vscode = inputs.nix4vscode;
-                  vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
+                  #vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
                   #inherit nixCats;
                   #quadletModule = inputs.quadlet-nix.homeManagerModules.quadlet;
                   #inherit (inputs) caelestia;

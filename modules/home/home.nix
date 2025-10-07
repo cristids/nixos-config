@@ -36,6 +36,7 @@
       nerd-fonts.noto
       nerd-fonts.jetbrains-mono
       # nerd-fonts.meslo-lgs-nf
+      emacs-pgtk
 
       # # Adds the 'hello' command to your environment. It prints a friendly
       # # "Hello, world!" when run.
@@ -92,10 +93,18 @@
   #
   home.sessionVariables = {
     # EDITOR = "emacs";
+    XDG_CONFIG_HOME = "/home/cristian/.config";
   };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  services.emacs = {
+    enable = true;
+    package = pkgs.emacs-pgtk;
+    client.enable = true;
+    startWithUserSession = "graphical"; # or "always"
+  };
 
   programs.fzf = {
     enable = true;

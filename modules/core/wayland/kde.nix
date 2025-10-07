@@ -9,7 +9,7 @@
     enable = true;
   };
 
-  nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.allowUnfree = true; # Moved to flake level
 
   environment.systemPackages = with pkgs; [
     kdePackages.kate
