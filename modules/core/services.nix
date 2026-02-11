@@ -52,6 +52,9 @@
     tailscale.useRoutingFeatures = "client";
     fprintd.enable = true;
 
+    unifi.enable = true;
+    unifi.openFirewall = true;
+
     # Enable the X11 windowing system.
     # You can disable this if you're only using the Wayland session.
     #         xserver.enable = true;
