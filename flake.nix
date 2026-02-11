@@ -35,16 +35,16 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    nixCats = {
-      url = "github:cristids/nixcats"; # if not pulled ok do : nix flake update nixCats  before rebuilding
-      #url = "path:/home/cristian/cristids/nixcats";
-    };
+    # nixCats = {
+    #   url = "github:cristids/nixcats"; # if not pulled ok do : nix flake update nixCats  before rebuilding
+    #   #url = "path:/home/cristian/cristids/nixcats";
+    # };
 
-    stylix = {
-      url = "github:danth/stylix";
-      #url = "github:danth/stylix/release-24.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    #stylix = {
+    #  url = "github:danth/stylix";
+    #  #url = "github:danth/stylix/release-24.11";
+    #  inputs.nixpkgs.follows = "nixpkgs";
+    #};
 
     # nix4vscode = {
     #   url = "github:nix-community/nix4vscode";
@@ -52,14 +52,32 @@
     # };
 
     # This flake adds mssql and sqltools extensions to the vscode
-    nix-vscode-extensions = {
-      url = "github:nix-community/nix-vscode-extensions/00e11463876a04a77fb97ba50c015ab9e5bee90d";
-      #inputs.nixpkgs.follows = "nixpkgs";
-    };
+    #nix-vscode-extensions = {
+    #  url = "github:nix-community/nix-vscode-extensions/00e11463876a04a77fb97ba50c015ab9e5bee90d";
+    #  #inputs.nixpkgs.follows = "nixpkgs";
+    #};
 
-#    emacs-overlay.url = "github:nix-community/emacs-overlay";
+    #    emacs-overlay.url = "github:nix-community/emacs-overlay";
 
     #quadlet-nix.url = "github:SEIAROTg/quadlet-nix";
+    #
+
+    #caelestia.url = "github:caelestia-dots/shell";
+    #caelestia.inputs.nixpkgs.follows = "nixpkgs";
+    #
+    # caelestia-shell = {
+    #   url = "github:miliu2cc/caelestia-shell-nixos";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    #caelestia-shell.url = "github:caelestia-dots/shell";
+    #
+
+    #quickshell = {
+    #  url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+    #  inputs.nixpkgs.follows = "nixpkgs";
+    #};
+
+    #niri.url = "github:sodiboo/niri-flake";
 
   };
 
@@ -68,7 +86,7 @@
       self,
       nixpkgs,
       home-manager,
-      nixCats,
+      #nixCats,
       # nix4vscode,
       #stylix,
       ...
@@ -78,10 +96,10 @@
       unstablePkgs = import inputs.unstable {
         inherit system;
         config.allowUnfree = true;
- #        overlays = [
- #          #   nix4vscode.overlays.forVscode
- # #          inputs.emacs-overlay.overlay
- #        ];
+        #        overlays = [
+        #          #   nix4vscode.overlays.forVscode
+        # #          inputs.emacs-overlay.overlay
+        #        ];
       };
 
       stablePkgs = import inputs.stable {
@@ -93,6 +111,7 @@
         ./modules/core/configuration.nix
         home-manager.nixosModules.home-manager
         #stylix.homeManagerModules.stylix
+
       ];
 
       lastModified = toString self.lastModified;
@@ -110,6 +129,7 @@
             ++ [
               {
                 networking.hostName = name;
+                nixpkgs.config.allowUnfree = true;
 
                 home-manager.useGlobalPkgs = true;
                 home-manager.useUserPackages = true;
@@ -122,12 +142,19 @@
                   # nvchadModule = inputs.nix4nvchad.homeManagerModule;
                   # nvfpkgs = inputs.nvfpkgs;
                   # nixvim = inputs.nixvim;
-                  stylixModule = inputs.stylix.homeModules.stylix;
+                  #stylixModule = inputs.stylix.homeModules.stylix;
                   # nix4vscode = inputs.nix4vscode;
-                  vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
-                  inherit nixCats;
+                  #vscode_exts = inputs.nix-vscode-extensions.extensions.${system}.vscode-marketplace;
+                  #inherit nixCats;
                   #quadletModule = inputs.quadlet-nix.homeManagerModules.quadlet;
+                  #inherit (inputs) caelestia;
+                  # quickshell = inputs.quickshell.packages.${system}.default.override {
+                  #   withX11 = false;
+                  #   withI3 = false;
+                  # };
+                  #inherit (inputs) niri;
                 };
+
               }
             ];
         };

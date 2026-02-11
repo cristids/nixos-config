@@ -1,6 +1,8 @@
-{...}: let
+{ ... }:
+let
   extraMonitorSettings = "";
-in {
+in
+{
   wayland.windowManager.hyprland = {
     settings = {
       windowrulev2 = [
@@ -65,6 +67,7 @@ in {
         "opacity 0.8 0.7, class:^(gedit|org.gnome.TextEditor|mousepad)$"
         "opacity 0.9 0.8, class:^(seahorse)$ # gnome-keyring gui"
         "opacity 0.95 0.75, title:^(Picture-in-Picture)$"
+        "opacity 0.85 0.85, class:^(emacs)$"
         "pin, title:^(Picture-in-Picture)$"
         "keepaspectratio, title:^(Picture-in-Picture)$"
         "noblur, tag:games*"

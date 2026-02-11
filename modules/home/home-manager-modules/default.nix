@@ -4,7 +4,8 @@
   lib,
   vars,
   ...
-}: {
+}:
+{
   imports = [
     ./packages.nix
     ./packages-unstable.nix
@@ -19,29 +20,27 @@
     ./git.nix
     ./gtk.nix
     ./htop.nix
-    ./hyprland
+    ./wayland
     ./helix.nix
     ./kitty.nix
     # ./nixvim.nix
     # ./nvchad.nix
-    # ./neovim.nix
+    ./neovim.nix
     ./nh.nix
     # ./nvf.nix
     ./kanshi.nix
     ./ollama.nix
     #./quadlet.nix #implements podman container for rootless mode
-    ./stylix.nix
+    #./stylix.nix
     #./starship.nix
     ./ohmyposh
     ./vscode.nix
     ./wezterm.nix
-    ./xdg.nix
     ./zoxide.nix
     ./zsh
     #./iiorient.nix
     #./iior.nix
     ./syncthing.nix
   ]
-      ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix
-  ;
+  ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;
 }

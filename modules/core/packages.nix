@@ -44,7 +44,6 @@
     # };
   };
 
-  nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
     appimage-run # Needed For AppImage Support
@@ -74,7 +73,6 @@
     lsof # lsof is a command that lists open files and the processes that opened them
     doublecmd # Double Commander is a cross platform open source file manager with two panels side by side
 
-    
     wget
     # vscode
     # azuredatastudio
@@ -99,5 +97,15 @@
     aider-chat
 
     rustup
+
+    lmstudio
+    claude-code
+    windsurf
+
+    protonvpn-gui
+    #nautilus
+    #kdePackages.dolphin
+    #mullvad-browser
+    #mullvad-vpn
   ];
 }

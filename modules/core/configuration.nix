@@ -4,6 +4,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -14,12 +15,8 @@
     ./packages.nix
     ./emacs.nix
     ./zsh.nix
-    #./kde.nix
     ./fonts.nix
     ./wayland
-    #./kde-unstable.nix
-    #./hyprland.nix
-    #./cosmic.nix
     #./podman.nix
     ./postgresql.nix
   ];
@@ -92,6 +89,7 @@
     pam.services.swaylock = {
       text = ''auth include login '';
     };
+
 
   };
   # Define a user account. Don't forget to set a password with ‘passwd’.

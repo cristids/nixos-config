@@ -1,44 +1,19 @@
 {
   pkgs,
   config,
+  lib,
   ...
-}: {
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-    theme = "breeze";
-  };
-
-  # security.pam.services = { 
-  #   sddm.kwallet = {
-  #     enable = true;
-  #     # enableKwallet = true;
-  #     # package = pkgs.kdePackages.kwallet-pam; 
-  #   };
-  #   login.kwallet = { 
-  #     enable = true; 
-  #     # package = pkgs.kdePackages.kwallet-pam; 
-  #   }; 
-  #   kde = { 
-  #     # allowNullPassword = true; 
-  #     kwallet = { 
-  #       enable = true; 
-  #       # package = pkgs.kdePackages.kwallet-pam; 
-  #     }; 
-  #   }; 
-  # };
-  # security.pam.services.login.enableKwallet = true;
-
+}:
+{
   services.desktopManager.plasma6 = {
     enable = true;
   };
 
-  nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.allowUnfree = true; # Moved to flake level
 
   environment.systemPackages = with pkgs; [
     kdePackages.kate
-    kdePackages.sddm-kcm
+    #kdePackages.sddm-kcm
     kdePackages.kcmutils
     kdePackages.plymouth-kcm
     kdePackages.kdeplasma-addons
@@ -58,7 +33,7 @@
     kdePackages.plasma-integration
     kdePackages.kdegraphics-thumbnailers
     kdePackages.breeze-icons
-    kdePackages.qtsvg #https://www.reddit.com/r/hyprland/comments/18ecoo3/dolphin_doesnt_work_properly_in_nixos_hyprland/
+    kdePackages.qtsvg # https://www.reddit.com/r/hyprland/comments/18ecoo3/dolphin_doesnt_work_properly_in_nixos_hyprland/
     kdePackages.kservice
     kdePackages.kwallet # provides helper service
     kdePackages.kwallet-pam # provides helper service
@@ -75,7 +50,7 @@
     # krename
 
     shared-mime-info
-    
+
     maliit-keyboard
 
     # Application integration
@@ -95,12 +70,9 @@
 
     # misc Plasma extras
     kdePackages.kdeplasma-addons
-    xdg-user-dirs
 
     qt5.qttools
     polonium
     kde-rounded-corners
-   
   ];
 }
-

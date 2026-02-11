@@ -2,9 +2,11 @@
   config,
   pkgs,
   ...
-}: let
+}:
+let
   stylixImage = "../../../../home/wallpapers/.Anime - Landscape.jpeg";
-in {
+in
+{
   home.packages = with pkgs; [
     brightnessctl
     swww
@@ -16,6 +18,7 @@ in {
     hyprpolkitagent
     hyprland-qtutils # needed for banners and ANR messages
     wlr-randr
+    hyprpicker
   ];
   systemd.user.targets.hyprland-session.Unit.Wants = [
     "xdg-desktop-autostart.target"
@@ -35,14 +38,14 @@ in {
     systemd = {
       enable = true;
       enableXdgAutostart = true;
-      variables = ["--all"];
+      variables = [ "--all" ];
     };
-    xwayland = {
-      enable = true;
-    };
+    # xwayland = {
+    #   enable = true;
+    # };
     settings = {
       exec-once = [
-        "${pkgs.kdePackages.kwallet-pam}/libexec/pam_kwallet_init"       
+        "${pkgs.kdePackages.kwallet-pam}/libexec/pam_kwallet_init"
         "wl-paste --type text --watch cliphist store # Stores only text data"
         "wl-paste --type image --watch cliphist store # Stores only image data"
         "dbus-update-activation-environment --all --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
@@ -76,8 +79,9 @@ in {
       };
 
       gestures = {
-        workspace_swipe = 1;
-        workspace_swipe_fingers = 3;
+        gesture = [ "3, horizontal, workspace" ];
+        #workspace_swipe = true;
+        #workspace_swipe_fingers = 3;
         workspace_swipe_distance = 500;
         workspace_swipe_invert = 1;
         workspace_swipe_min_speed_to_force = 30;
@@ -93,7 +97,8 @@ in {
         gaps_out = 8;
         border_size = 2;
         resize_on_border = true;
-        "col.active_border" = "rgb(${config.lib.stylix.colors.base08}) rgb(${config.lib.stylix.colors.base0C}) 45deg";
+        "col.active_border" =
+          "rgb(${config.lib.stylix.colors.base08}) rgb(${config.lib.stylix.colors.base0C}) 45deg";
         "col.inactive_border" = "rgb(${config.lib.stylix.colors.base01})";
       };
 
@@ -106,7 +111,7 @@ in {
         disable_splash_rendering = true;
         enable_swallow = false;
         vfr = true; # Variable Frame Rate
-        vrr = 2; #Variable Refresh Rate  Might need to set to 0 for NVIDIA/AQ_DRM_DEVICES
+        vrr = 2; # Variable Refresh Rate  Might need to set to 0 for NVIDIA/AQ_DRM_DEVICES
         # Screen flashing to black momentarily or going black when app is fullscreen
         # Try setting vrr to 0
       };
@@ -141,11 +146,12 @@ in {
         no_warps = true;
       };
 
-      render = {
-        explicit_sync = 1; # Change to 1 to disable
-        explicit_sync_kms = 1;
-        direct_scanout = 0;
-      };
+      #These were obsoleted in 0.50
+      #render = {
+      #  explicit_sync = 1; # Change to 1 to disable
+      #  explicit_sync_kms = 1;
+      #  direct_scanout = 0;
+      #};
 
       master = {
         new_status = "master";
@@ -155,6 +161,7 @@ in {
 
       env = [
         "NIXOS_OZONE_WL, 1"
+        "ELECTRON_OZONE_PLATFORM_HINT, auto"
         "NIXPKGS_ALLOW_UNFREE, 1"
         "XDG_MENU_PREFIX,plasma-"
         "XDG_CURRENT_DESKTOP, Hyprland"
@@ -163,12 +170,14 @@ in {
         "GDK_BACKEND, wayland, x11"
         "CLUTTER_BACKEND, wayland"
         "QT_QPA_PLATFORM, wayland"
-        "QT_QPA_PLATFORMTHEME, kde"
+        #"QT_QPA_PLATFORMTHEME, kde"
+        "QT_QPA_PLATFORMTHEME,qt5ct"
+        "QT_STYLE_OVERRIDE,Breeze"
         "QT_WAYLAND_DISABLE_WINDOWDECORATION, 1"
         "QT_AUTO_SCREEN_SCALE_FACTOR, 1"
         "SDL_VIDEODRIVER, x11"
         "MOZ_ENABLE_WAYLAND, 1"
-        "AQ_DRM_DEVICES,/dev/dri/card0:/dev/dri/card1"
+        # "AQ_DRM_DEVICES,/dev/dri/card0:/dev/dri/card1"
         "GDK_SCALE,1"
         "QT_SCALE_FACTOR,1"
         "EDITOR,nvim"
@@ -178,7 +187,7 @@ in {
     extraConfig = "
 #      source = ~/.config/hypr/monitors.conf
        monitor=eDP-1,preferred,auto,1.6
-       monitor=eDP-1,transform,3
+       #monitor=eDP-1,transform,3
        workspace=edp-1,1
        monitor=,preferred,auto,auto
     ";

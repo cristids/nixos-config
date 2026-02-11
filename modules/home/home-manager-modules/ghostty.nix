@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   programs.ghostty = {
     enable = true;
     package = pkgs.ghostty;
@@ -6,14 +7,14 @@
   home.file."./.config/ghostty/config".text = ''
 
     #theme = Aura
-    theme = Dracula
+    #theme = Dracula
     #theme = Aardvark Blue
-    #theme = GruvboxDarkHard
+    theme = GruvboxDarkHard
     adjust-cell-height = 10%
     window-theme = dark
     window-height = 32
     window-width = 110
-    background-opacity = 0.95
+    background-opacity = 0.85
     background-blur-radius = 60
     selection-background = #2d3f76
     selection-foreground = #c8d3f5

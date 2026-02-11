@@ -1,7 +1,7 @@
 { pkgs, unstablePkgs, ... }:
 {
 
-  #programs.nix-ld.enable = true;
+  programs.nix-ld.enable = true;
 
   environment.systemPackages = with unstablePkgs; [
     git
@@ -17,7 +17,7 @@
     pipenv
     #rust-analyzer
     #rustc
-    cargo
+    #cargo
     gcc
     glibc
     glibc.dev
@@ -30,10 +30,12 @@
     sqlite
     ispell
     source-code-pro
+    gdb
+    lldb
   ];
 
-  services.emacs = {
-    enable = true;
-    package = unstablePkgs.emacs-pgtk; # replace with emacs-gtk, or a version provided by the community overlay if desired.
-  };
+  # services.emacs = {
+  #   enable = true;
+  #   package = unstablePkgs.emacs-pgtk; # replace with emacs-gtk, or a version provided by the community overlay if desired.
+  # };
 }

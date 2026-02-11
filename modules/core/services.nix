@@ -3,7 +3,8 @@
   config,
   unstablePkgs,
   ...
-}: {
+}:
+{
   services = {
     acpid.enable = true;
     libinput.enable = true; # Input Handling
@@ -16,7 +17,7 @@
     btrfs.autoScrub = {
       enable = true;
       interval = "weekly"; # You can also use "monthly"
-      fileSystems = ["/"]; # Add other Btrfs mount points if needed
+      fileSystems = [ "/" ]; # Add other Btrfs mount points if needed
     };
 
     smartd = {
@@ -47,7 +48,12 @@
 
     # gnome.gnome-keyring.enable = true;
 
-    onedrive.enable = true;
+    dbus.implementation = "broker";
+    dbus.enable = true;
+
+    xserver.enable = false;
+
+    onedrive.enable = false;
     tailscale.enable = true;
     tailscale.useRoutingFeatures = "client";
     fprintd.enable = true;
