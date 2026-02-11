@@ -107,5 +107,7 @@
     #kdePackages.dolphin
     #mullvad-browser
     #mullvad-vpn
+    #
+    uv
   ];
 }
