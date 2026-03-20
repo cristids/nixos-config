@@ -1,7 +1,6 @@
 {
   stdenv,
   lib,
-  fetchurl,
   rpm,
   cpio,
   glib,
@@ -26,10 +25,9 @@ stdenv.mkDerivation rec {
   pname = "libfprint-focaltech";
   version = "1.94.9";
 
-  src = fetchurl {
-    url = "https://github.com/ftfpteams/focaltech-linux-fingerprint-driver/raw/refs/heads/main/Fedora_Redhat/libfprint-2-2_1.94.4+tod1_redhat_all_x64_20250219.install";
-    sha256 = "0y7kb2mr7zd2irfgsmfgdpb0c7v33cb4hf3hfj7mndalma3xdhzn";  # Will help you fetch this in a sec
-  };
+  # Original upstream (https://github.com/ftfpteams/focaltech-linux-fingerprint-driver)
+  # was taken down via DMCA (HTTP 451). File archived from Wayback Machine on 2026-03-20.
+  src = ./libfprint-2-2_1.94.4+tod1_redhat_all_x64_20250219.install;
 
   nativeBuildInputs = [
     rpm
