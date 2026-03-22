@@ -42,5 +42,6 @@
     #./iior.nix
     ./syncthing.nix
   ]
-  ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix;
+  ++ lib.optional (vars.hostName == "gpdp4-nix") ./autorotate.nix
+  ++ lib.optional (vars.hostName == "gpdp4-nix") ./cosmic-keybindings.nix;
 }

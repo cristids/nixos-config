@@ -8,7 +8,8 @@
     firefox.enable = true; # Firefox is not installed by default
     dconf.enable = true;
     mtr.enable = true;
-    adb.enable = true;
+    #adb.enable = true;
+    appimage.enable = true;
 
     steam = {
       enable = true;
@@ -56,7 +57,7 @@
     lm_sensors # Used For Getting Hardware Temps
     lshw # Detailed Hardware Information
     mpv # Incredible Video Player
-    nixfmt-rfc-style # Nix Formatter
+    nixfmt # Nix Formatter
     pciutils # Collection Of Tools For Inspecting PCI Devices
     #rhythmbox
     ripgrep # Improved Grep
@@ -68,14 +69,13 @@
     wget # Tool For Fetching Files With Links
     yazi # TUI File Manager
     zip # Tool For Handling .zip Files
-    lha # Tool For Handling .lha Files
+    #lha # Tool For Handling .lha Files
     jq # jq is a lightweight and flexible command-line JSON processor
     lsof # lsof is a command that lists open files and the processes that opened them
     doublecmd # Double Commander is a cross platform open source file manager with two panels side by side
 
     wget
     # vscode
-    # azuredatastudio
     mc
     rambox
     gcc
@@ -100,8 +100,9 @@
 
     lmstudio
     claude-code
-    windsurf
+    #windsurf
 
+    obsidian
     protonvpn-gui
     #nautilus
     #kdePackages.dolphin
@@ -109,5 +110,7 @@
     #mullvad-vpn
     #
     uv
+    mosh
+    #gearlever # disabled: dwarfs build broken with boost 1.89
   ];
 }
