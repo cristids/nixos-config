@@ -1,0 +1,11 @@
+--- a/grub-core/video/fb/video_fb.c
++++ b/grub-core/video/fb/video_fb.c
+@@ -1340,7 +1340,7 @@ grub_video_fb_setup (unsigned int mode_type, unsigned int mode_mask,
+   grub_video_fb_set_palette (0, ARRAY_SIZE (grub_video_fbstd_colors),
+                              grub_video_fbstd_colors);
+
+-  const char *rot_env;
++  const char *rot_env __attribute__((unused));
+
+   // Set default rotation based on mode info
+   rot_env = grub_env_get("rotation");

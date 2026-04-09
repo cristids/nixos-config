@@ -19,6 +19,7 @@
     ./wayland
     #./podman.nix
     ./postgresql.nix
+    ./gnome-keyring-unlock.nix
   ];
 
   nix.settings.download-buffer-size = 536870912; # 512 MiB;
@@ -109,6 +110,7 @@
       "input"
       "adbusers"
       "dialout"
+      "tss"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [

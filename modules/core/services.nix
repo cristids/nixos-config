@@ -46,7 +46,7 @@
     #xserver.displayManager.gdm.enable = true;
     #xserver.desktopManager.gnome.enable = true;
 
-    # gnome.gnome-keyring.enable = true;
+    # gnome-keyring is enabled in gnome-keyring-unlock.nix
 
     dbus.implementation = "broker";
     dbus.enable = true;
@@ -58,8 +58,8 @@
     tailscale.useRoutingFeatures = "client";
     fprintd.enable = true;
 
-    unifi.enable = true;
-    unifi.openFirewall = true;
+    #unifi.enable = true;
+    #unifi.openFirewall = true;
 
     # Enable the X11 windowing system.
     # You can disable this if you're only using the Wayland session.

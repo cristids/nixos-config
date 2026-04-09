@@ -28,7 +28,7 @@ in {
     #affine #disabled because it requires electron which is now insecure
     #azuredatastudio
     customCursor
-    customAzureDataStudio
+    #customAzureDataStudio #disabled - download URL broken
     #vscode
     wl-clipboard
     amfora

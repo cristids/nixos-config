@@ -94,7 +94,7 @@
     hplipWithPlugin
 
     zed-editor
-    aider-chat
+    #aider-chat
 
     rustup
 

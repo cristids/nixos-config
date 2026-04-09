@@ -79,6 +79,13 @@
 
     #niri.url = "github:sodiboo/niri-flake";
 
+    claude-code-overlay.url = "github:ryoppippi/claude-code-overlay";
+
+    cosmic = {
+      url = "github:PhoenixPhantom/nixos-cosmic";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =
@@ -86,6 +93,7 @@
       self,
       nixpkgs,
       home-manager,
+      cosmic,
       #nixCats,
       # nix4vscode,
       #stylix,
@@ -110,6 +118,7 @@
       sharedModules = [
         ./modules/core/configuration.nix
         home-manager.nixosModules.home-manager
+        cosmic.nixosModules.default
         #stylix.homeManagerModules.stylix
 
       ];
@@ -130,6 +139,9 @@
               {
                 networking.hostName = name;
                 nixpkgs.config.allowUnfree = true;
+                nixpkgs.overlays = [
+                  inputs.claude-code-overlay.overlays.default
+                ];
 
                 home-manager.useGlobalPkgs = true;
                 home-manager.useUserPackages = true;
